@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useHabitTracker } from './hooks/useHabitTracker';
 import { HabitItem } from './components/HabitItem';
-import { HabitForm } from './components/HabitForm';
 import { HabitStats } from './components/HabitStats';
 import { ThemeToggle } from './components/ThemeToggle';
 import { DataControls } from './components/DataControls';
@@ -25,7 +24,6 @@ function App() {
     statistics,
     isLoading,
     toggleHabitCompletion, 
-    addHabit, 
     removeHabit,
     updateHabit,
     exportData,
@@ -160,8 +158,6 @@ function App() {
 
         {activeTab === 'habits' && (
           <>
-            <HabitForm onAddHabit={addHabit} />
-
             <div className="divider">Seus Hábitos</div>
 
             {habits.length === 0 ? (

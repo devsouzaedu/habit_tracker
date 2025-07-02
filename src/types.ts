@@ -23,6 +23,9 @@ export const HabitCategory = {
   LESS_ZAZA: 'LESS_ZAZA',
   NO_PMO: 'NO_PMO',
   NO_MST: 'NO_MST',
+  ESTUDO: 'ESTUDO',
+  CASACARE: 'CASACARE',
+  CONTEUDO: 'CONTEUDO',
 } as const;
 
 export type HabitCategory = typeof HabitCategory[keyof typeof HabitCategory];

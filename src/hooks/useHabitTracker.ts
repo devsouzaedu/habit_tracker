@@ -121,6 +121,45 @@ const defaultHabits: Habit[] = [
     streak: 0,
     bestStreak: 0
   },
+  { 
+    id: '10', 
+    name: 'Estudo', 
+    category: HabitCategory.ESTUDO, 
+    completed: [false, false, false, false, false, false, false],
+    priority: HabitPriority.HIGH,
+    goal: 5,
+    color: '#059669',
+    icon: '📖',
+    notes: '',
+    streak: 0,
+    bestStreak: 0
+  },
+  { 
+    id: '11', 
+    name: 'Casacare', 
+    category: HabitCategory.CASACARE, 
+    completed: [false, false, false, false, false, false, false],
+    priority: HabitPriority.MEDIUM,
+    goal: 4,
+    color: '#7c3aed',
+    icon: '🏠',
+    notes: '',
+    streak: 0,
+    bestStreak: 0
+  },
+  { 
+    id: '12', 
+    name: 'Conteudo', 
+    category: HabitCategory.CONTEUDO, 
+    completed: [false, false, false, false, false, false, false],
+    priority: HabitPriority.HIGH,
+    goal: 6,
+    color: '#ea580c',
+    icon: '🎬',
+    notes: '',
+    streak: 0,
+    bestStreak: 0
+  },
 ];
 
 // Função para obter os dias a partir do dia atual
