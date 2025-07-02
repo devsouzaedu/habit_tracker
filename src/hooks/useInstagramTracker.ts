@@ -5,15 +5,7 @@ import { supabase } from '../lib/supabase';
 export const useInstagramTracker = () => {
   const [data, setData] = useState<InstagramData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [userId] = useState(() => {
-    // Usar o mesmo userId dos hábitos
-    let storedUserId = localStorage.getItem('user-id');
-    if (!storedUserId) {
-      storedUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('user-id', storedUserId);
-    }
-    return storedUserId;
-  });
+  const userId = 'jose_dashboard_2025'; // ID fixo para José
 
   // Carregar dados do Supabase na inicialização
   useEffect(() => {

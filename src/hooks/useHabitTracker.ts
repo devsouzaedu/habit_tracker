@@ -166,15 +166,7 @@ export const useHabitTracker = () => {
   });
   
   const [isLoading, setIsLoading] = useState(true);
-  const [userId] = useState(() => {
-    // Pegar userId do localStorage ou gerar um novo
-    let storedUserId = localStorage.getItem('user-id');
-    if (!storedUserId) {
-      storedUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('user-id', storedUserId);
-    }
-    return storedUserId;
-  });
+  const userId = 'jose_dashboard_2025'; // ID fixo para José
 
   // Carregar dados do Supabase na inicialização
   useEffect(() => {
@@ -194,6 +186,7 @@ export const useHabitTracker = () => {
 
   const loadFromSupabase = async () => {
     try {
+      console.log('🔄 Carregando dados dos hábitos para:', userId);
       const { data, error } = await supabase
         .from('habits_data')
         .select('habit_data')
@@ -201,24 +194,30 @@ export const useHabitTracker = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = row not found
-        console.error('Erro ao carregar dados:', error);
+        console.error('❌ Erro ao carregar dados:', error);
         setIsLoading(false);
         return;
       }
 
       if (data && data.habit_data) {
+        console.log('✅ Dados dos hábitos carregados:', data.habit_data);
         setState(data.habit_data);
+      } else {
+        console.log('📝 Nenhum dado encontrado, usando dados padrão');
       }
       
       setIsLoading(false);
     } catch (error) {
-      console.error('Erro ao conectar com Supabase:', error);
+      console.error('❌ Erro ao conectar com Supabase:', error);
       setIsLoading(false);
     }
   };
 
   const saveToSupabase = async () => {
     try {
+      console.log('💾 Salvando dados dos hábitos para:', userId);
+      console.log('📊 Estado atual:', state);
+      
       const { error } = await supabase
         .from('habits_data')
         .upsert({
@@ -228,10 +227,12 @@ export const useHabitTracker = () => {
         });
 
       if (error) {
-        console.error('Erro ao salvar dados:', error);
+        console.error('❌ Erro ao salvar dados:', error);
+      } else {
+        console.log('✅ Dados dos hábitos salvos com sucesso');
       }
     } catch (error) {
-      console.error('Erro ao conectar com Supabase:', error);
+      console.error('❌ Erro ao conectar com Supabase:', error);
     }
   };
 
