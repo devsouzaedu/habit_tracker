@@ -218,18 +218,34 @@ export const useHabitTracker = () => {
       console.log('💾 Salvando dados dos hábitos para:', userId);
       console.log('📊 Estado atual:', state);
       
-      const { error } = await supabase
+      // Primeiro, tentar atualizar
+      const { error: updateError } = await supabase
         .from('habits_data')
-        .upsert({
-          user_id: userId,
+        .update({
           habit_data: state,
           updated_at: new Date().toISOString(),
-        });
+        })
+        .eq('user_id', userId);
 
-      if (error) {
-        console.error('❌ Erro ao salvar dados:', error);
+      // Se não existir registro, inserir novo
+      if (updateError && updateError.code === 'PGRST116') {
+        const { error: insertError } = await supabase
+          .from('habits_data')
+          .insert({
+            user_id: userId,
+            habit_data: state,
+            updated_at: new Date().toISOString(),
+          });
+
+        if (insertError) {
+          console.error('❌ Erro ao inserir dados:', insertError);
+        } else {
+          console.log('✅ Dados dos hábitos inseridos com sucesso');
+        }
+      } else if (updateError) {
+        console.error('❌ Erro ao atualizar dados:', updateError);
       } else {
-        console.log('✅ Dados dos hábitos salvos com sucesso');
+        console.log('✅ Dados dos hábitos atualizados com sucesso');
       }
     } catch (error) {
       console.error('❌ Erro ao conectar com Supabase:', error);

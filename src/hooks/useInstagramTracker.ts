@@ -63,6 +63,8 @@ export const useInstagramTracker = () => {
 
   const saveToSupabase = async () => {
     try {
+      console.log('💾 Salvando dados do Instagram para:', userId);
+      
       // Deletar dados antigos do usuário
       await supabase
         .from('instagram_data')
@@ -85,10 +87,12 @@ export const useInstagramTracker = () => {
         .insert(supabaseData);
 
       if (error) {
-        console.error('Erro ao salvar dados do Instagram:', error);
+        console.error('❌ Erro ao salvar dados do Instagram:', error);
+      } else {
+        console.log('✅ Dados do Instagram salvos com sucesso');
       }
     } catch (error) {
-      console.error('Erro ao conectar com Supabase:', error);
+      console.error('❌ Erro ao conectar com Supabase:', error);
     }
   };
 
