@@ -46,8 +46,8 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-base-200 p-1">
-      <div className="container mx-auto max-w-6xl">
+    <div className="min-h-screen bg-base-200 p-1 sm:p-2">
+      <div className="container mx-auto max-w-4xl">
         {/* Header com data, hora e clima */}
         <DashboardHeader />
 
@@ -215,7 +215,7 @@ function App() {
           </>
         )}
 
-        <footer className="footer footer-center p-2 sm:p-4 bg-base-100 text-base-content rounded-box mt-6 sm:mt-10">
+        <footer className="footer footer-center p-2 bg-base-100 text-base-content rounded-box mt-4">
           <div>
             <p className="text-sm sm:text-base">© 2025 - Dashboard J.M.SOUZA</p>
           </div>
