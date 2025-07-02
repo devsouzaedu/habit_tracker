@@ -8,6 +8,32 @@ interface WeatherData {
   icon: string;
 }
 
+// Função para converter códigos de ícone da API em emojis
+const getWeatherIcon = (iconCode: string): string => {
+  const iconMap: { [key: string]: string } = {
+    '01d': '☀️', // clear sky day
+    '01n': '🌙', // clear sky night
+    '02d': '⛅', // few clouds day
+    '02n': '☁️', // few clouds night
+    '03d': '☁️', // scattered clouds
+    '03n': '☁️',
+    '04d': '☁️', // broken clouds
+    '04n': '☁️',
+    '09d': '🌧️', // shower rain
+    '09n': '🌧️',
+    '10d': '🌦️', // rain day
+    '10n': '🌧️', // rain night
+    '11d': '⛈️', // thunderstorm
+    '11n': '⛈️',
+    '13d': '❄️', // snow
+    '13n': '❄️',
+    '50d': '🌫️', // mist
+    '50n': '🌫️'
+  };
+  
+  return iconMap[iconCode] || '🌤️';
+};
+
 export function DashboardHeader() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -26,27 +52,20 @@ export function DashboardHeader() {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        // Usando OpenWeatherMap API (você pode usar uma chave gratuita)
-        // Para desenvolvimento, vou simular dados do clima
-        // Em produção, você deve usar uma API real como OpenWeatherMap
+        const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
         
-        // Simulação de dados do clima para Barueri
-        setTimeout(() => {
-          const mockWeather: WeatherData = {
-            temperature: Math.floor(Math.random() * 15) + 20, // 20-35°C
-            description: ['Ensolarado', 'Parcialmente nublado', 'Nublado', 'Chuva leve'][Math.floor(Math.random() * 4)],
-            icon: '☀️'
-          };
-          setWeather(mockWeather);
-          setWeatherLoading(false);
-        }, 1000);
-
-        // Código real para API do clima (descomente quando tiver a chave da API):
-        /*
-        const API_KEY = 'sua_chave_da_api';
+        if (!API_KEY) {
+          throw new Error('Chave da API OpenWeatherMap não configurada');
+        }
+        
         const response = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?q=Barueri,BR&appid=${API_KEY}&units=metric&lang=pt_br`
         );
+        
+        if (!response.ok) {
+          throw new Error('Erro ao buscar dados do clima');
+        }
+        
         const data = await response.json();
         
         setWeather({
@@ -55,9 +74,14 @@ export function DashboardHeader() {
           icon: getWeatherIcon(data.weather[0].icon)
         });
         setWeatherLoading(false);
-        */
       } catch (error) {
         console.error('Erro ao buscar dados do clima:', error);
+        // Em caso de erro, usar dados simulados como fallback
+        setWeather({
+          temperature: Math.floor(Math.random() * 15) + 20,
+          description: 'Clima indisponível',
+          icon: '🌤️'
+        });
         setWeatherLoading(false);
       }
     };
