@@ -15,7 +15,10 @@ import { HabitCategory, HabitPriority } from './types';
 import './App.css';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    // Verificar se já está logado neste dispositivo
+    return localStorage.getItem('dashboard-authenticated') === 'true';
+  });
   const { 
     habits, 
     currentWeek, 
@@ -32,13 +35,18 @@ function App() {
 
   const [activeTab, setActiveTab] = useState<'habits' | 'stats' | 'instagram' | 'settings'>('habits');
 
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem('dashboard-authenticated', 'true');
+  };
+
   // Mostrar tela de login se não estiver logado
   if (!isLoggedIn) {
-    return <LoginScreen onLogin={() => setIsLoggedIn(true)} />;
+    return <LoginScreen onLogin={handleLogin} />;
   }
 
   return (
-    <div className="min-h-screen bg-base-200 p-4">
+    <div className="min-h-screen bg-base-200 p-2 sm:p-4">
       <div className="container mx-auto max-w-6xl">
         {/* Header com data, hora e clima */}
         <DashboardHeader />
@@ -46,12 +54,12 @@ function App() {
         {/* Frase inspiracional */}
         <InspirationalQuote />
 
-        <header className="navbar bg-base-100 rounded-box mb-6 shadow-lg">
+        <header className="navbar bg-base-100 rounded-box mb-3 sm:mb-6 shadow-lg p-2 sm:p-4">
           <div className="flex-1">
             <div>
-              <h1 className="text-2xl font-bold px-4">Dashboard</h1>
-              <div className="px-4 text-xs text-base-content/50 flex items-center gap-2">
-                <span>👤 José</span>
+              <h1 className="text-xl sm:text-2xl font-bold px-2 sm:px-4">Dashboard</h1>
+              <div className="px-2 sm:px-4 text-xs text-base-content/50 flex items-center gap-2">
+                <span>👤 J.M.SOUZA</span>
                 {isLoading && <span className="loading loading-spinner loading-xs"></span>}
                 <button 
                   onClick={refreshData}
@@ -64,19 +72,12 @@ function App() {
               </div>
             </div>
           </div>
-          <div className="flex-none gap-2">
-            <button 
-              onClick={() => setIsLoggedIn(false)}
-              className="btn btn-ghost btn-sm"
-              title="Sair"
-            >
-              🚪 Sair
-            </button>
+          <div className="flex-none">
             <ThemeToggle />
           </div>
         </header>
 
-        <div className="tabs tabs-boxed mb-6">
+        <div className="tabs tabs-boxed mb-3 sm:mb-6 text-sm sm:text-base">
           <a 
             className={`tab ${activeTab === 'habits' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('habits')}
@@ -119,8 +120,8 @@ function App() {
             
             <div className="divider">Informações do Sistema</div>
             
-            <div className="bg-base-100 rounded-box p-6 space-y-4">
-              <h3 className="text-lg font-semibold">👤 Dashboard do José</h3>
+            <div className="bg-base-100 rounded-box p-4 sm:p-6 space-y-4">
+              <h3 className="text-base sm:text-lg font-semibold">👤 Dashboard do J.M.SOUZA</h3>
               
               <div className="alert alert-success">
                 <div>
@@ -149,7 +150,7 @@ function App() {
                 
                 <div className="stat">
                   <div className="stat-title">Usuário</div>
-                  <div className="stat-value text-sm">José</div>
+                  <div className="stat-value text-sm">J.M.SOUZA</div>
                   <div className="stat-desc">Dashboard pessoal</div>
                 </div>
               </div>
@@ -214,9 +215,9 @@ function App() {
           </>
         )}
 
-        <footer className="footer footer-center p-4 bg-base-100 text-base-content rounded-box mt-10">
+        <footer className="footer footer-center p-2 sm:p-4 bg-base-100 text-base-content rounded-box mt-6 sm:mt-10">
           <div>
-            <p>© 2025 - Dashboard Pessoal</p>
+            <p className="text-sm sm:text-base">© 2025 - Dashboard J.M.SOUZA</p>
           </div>
         </footer>
       </div>

@@ -103,14 +103,14 @@ export function DashboardHeader() {
   };
 
   return (
-    <div className="bg-base-100 rounded-box p-6 mb-6 shadow-lg">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="bg-base-100 rounded-box p-3 sm:p-6 mb-3 sm:mb-6 shadow-lg">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
         {/* Data e Hora */}
         <div className="space-y-1">
-          <h2 className="text-2xl lg:text-3xl font-bold text-primary">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary">
             {formatTime(currentTime)}
           </h2>
-          <p className="text-base-content/70 capitalize">
+          <p className="text-sm sm:text-base text-base-content/70 capitalize">
             {formatDate(currentTime)}
           </p>
         </div>
@@ -123,13 +123,13 @@ export function DashboardHeader() {
               <span className="text-base-content/70">Carregando clima...</span>
             </div>
           ) : weather ? (
-            <div className="flex items-center gap-3 bg-base-200 rounded-lg px-4 py-2">
-              <span className="text-2xl">{weather.icon}</span>
+            <div className="flex items-center gap-2 sm:gap-3 bg-base-200 rounded-lg px-3 sm:px-4 py-2">
+              <span className="text-xl sm:text-2xl">{weather.icon}</span>
               <div>
-                <div className="text-lg font-semibold">
+                <div className="text-base sm:text-lg font-semibold">
                   {weather.temperature}°C
                 </div>
-                <div className="text-sm text-base-content/70 capitalize">
+                <div className="text-xs sm:text-sm text-base-content/70 capitalize">
                   Barueri - {weather.description}
                 </div>
               </div>
