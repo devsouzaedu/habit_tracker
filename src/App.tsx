@@ -7,10 +7,14 @@ import { ThemeToggle } from './components/ThemeToggle';
 import { DataControls } from './components/DataControls';
 import { InstagramTracker } from './components/InstagramTracker';
 import { SyncSettings } from './components/SyncSettings';
+import { LoginScreen } from './components/LoginScreen';
+import { DashboardHeader } from './components/DashboardHeader';
+import { InspirationalQuote } from './components/InspirationalQuote';
 import { HabitCategory, HabitPriority } from './types';
 import './App.css';
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { 
     habits, 
     currentWeek, 
@@ -25,14 +29,32 @@ function App() {
 
   const [activeTab, setActiveTab] = useState<'habits' | 'stats' | 'instagram' | 'settings'>('habits');
 
+  // Mostrar tela de login se não estiver logado
+  if (!isLoggedIn) {
+    return <LoginScreen onLogin={() => setIsLoggedIn(true)} />;
+  }
+
   return (
     <div className="min-h-screen bg-base-200 p-4">
       <div className="container mx-auto max-w-6xl">
+        {/* Header com data, hora e clima */}
+        <DashboardHeader />
+
+        {/* Frase inspiracional */}
+        <InspirationalQuote />
+
         <header className="navbar bg-base-100 rounded-box mb-6 shadow-lg">
           <div className="flex-1">
-            <h1 className="text-2xl font-bold px-4">Tracker de Hábitos & Instagram</h1>
+            <h1 className="text-2xl font-bold px-4">Dashboard</h1>
           </div>
-          <div className="flex-none">
+          <div className="flex-none gap-2">
+            <button 
+              onClick={() => setIsLoggedIn(false)}
+              className="btn btn-ghost btn-sm"
+              title="Sair"
+            >
+              🚪 Sair
+            </button>
             <ThemeToggle />
           </div>
         </header>
@@ -141,7 +163,7 @@ function App() {
 
         <footer className="footer footer-center p-4 bg-base-100 text-base-content rounded-box mt-10">
           <div>
-            <p>© 2025 - Tracker de Hábitos & Instagram</p>
+            <p>© 2025 - Dashboard Pessoal</p>
           </div>
         </footer>
       </div>
