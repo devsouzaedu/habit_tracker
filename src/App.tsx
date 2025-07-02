@@ -46,7 +46,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-base-200 p-2 sm:p-4">
+    <div className="min-h-screen bg-base-200 p-1">
       <div className="container mx-auto max-w-6xl">
         {/* Header com data, hora e clima */}
         <DashboardHeader />
@@ -54,11 +54,11 @@ function App() {
         {/* Frase inspiracional */}
         <InspirationalQuote />
 
-        <header className="navbar bg-base-100 rounded-box mb-3 sm:mb-6 shadow-lg p-2 sm:p-4">
+        <header className="navbar bg-base-100 rounded-box mb-2 shadow-lg p-2">
           <div className="flex-1">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold px-2 sm:px-4">Dashboard</h1>
-              <div className="px-2 sm:px-4 text-xs text-base-content/50 flex items-center gap-2">
+              <h1 className="text-xl font-bold px-2">Dashboard</h1>
+              <div className="px-2 text-xs text-base-content/50 flex items-center gap-2">
                 <span>👤 J.M.SOUZA</span>
                 {isLoading && <span className="loading loading-spinner loading-xs"></span>}
                 <button 
@@ -77,7 +77,7 @@ function App() {
           </div>
         </header>
 
-        <div className="tabs tabs-boxed mb-3 sm:mb-6 text-sm sm:text-base">
+        <div className="tabs tabs-boxed mb-2 text-sm">
           <a 
             className={`tab ${activeTab === 'habits' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('habits')}
@@ -109,19 +109,19 @@ function App() {
         )}
 
         {activeTab === 'instagram' && (
-          <div className="bg-base-100 rounded-box p-6">
-            <InstagramTracker />
-          </div>
+                      <div className="bg-base-100 rounded-box p-3">
+              <InstagramTracker />
+            </div>
         )}
 
         {activeTab === 'settings' && (
-          <div className="space-y-6">
+          <div className="space-y-3">
             <DataControls onExport={exportData} onImport={importData} />
             
             <div className="divider">Informações do Sistema</div>
             
-            <div className="bg-base-100 rounded-box p-4 sm:p-6 space-y-4">
-              <h3 className="text-base sm:text-lg font-semibold">👤 Dashboard do J.M.SOUZA</h3>
+            <div className="bg-base-100 rounded-box p-3 space-y-3">
+                              <h3 className="text-base font-semibold">👤 Dashboard do J.M.SOUZA</h3>
               
               <div className="alert alert-success">
                 <div>
@@ -178,7 +178,7 @@ function App() {
                   if (habitsInCategory.length === 0) return null;
                   
                   return (
-                    <div key={category} className="mb-6">
+                    <div key={category} className="mb-3">
                       <div className="flex items-center gap-2 mb-2">
                         <h2 className="text-xl font-bold">{category}</h2>
                         <div className="badge badge-neutral">

@@ -52,8 +52,8 @@ export const HabitItem = ({ habit, weekDays, onToggle, onRemove, onUpdate }: Hab
   const isGoalMet = progressPercentage >= 100;
 
   return (
-    <div className="card bg-base-100 shadow-xl mb-4" style={{ borderLeft: `4px solid ${habit.color}` }}>
-      <div className="card-body p-4">
+    <div className="card bg-base-100 shadow-xl mb-2" style={{ borderLeft: `4px solid ${habit.color}` }}>
+      <div className="card-body p-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div 
@@ -137,22 +137,22 @@ export const HabitItem = ({ habit, weekDays, onToggle, onRemove, onUpdate }: Hab
           </div>
         )}
         
-        <div className="grid grid-cols-7 gap-1 mt-2">
+        <div className="grid grid-cols-7 gap-2 mt-3">
           {weekDays.map((day, index) => {
             const isToday = new Date(day).toDateString() === new Date().toDateString();
             
             return (
-              <div key={index} className="flex flex-col items-center">
-                <span className={`text-xs mb-1 ${isToday ? 'font-bold text-primary' : ''}`}>
+              <div key={index} className="flex flex-col items-center justify-center">
+                <span className={`text-xs mb-2 text-center ${isToday ? 'font-bold text-primary' : ''}`}>
                   {getDayLabel(day)}
                   {isToday && ' (hoje)'}
                 </span>
-                <label className="cursor-pointer">
+                <label className="cursor-pointer flex justify-center">
                   <input
                     type="checkbox"
                     checked={habit.completed[index]}
                     onChange={() => onToggle(habit.id, index)}
-                    className={`checkbox ${
+                    className={`checkbox checkbox-lg ${
                       habit.priority === HabitPriority.HIGH ? 'checkbox-error' : 
                       habit.priority === HabitPriority.MEDIUM ? 'checkbox-warning' : 'checkbox-info'
                     }`}

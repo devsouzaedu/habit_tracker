@@ -89,8 +89,8 @@ export function InspirationalQuote() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-box p-3 sm:p-6 mb-3 sm:mb-6 shadow-lg">
-      <div className="flex items-start justify-between mb-4">
+    <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-box p-2 mb-2 shadow-lg">
+      <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-2xl">{getCategoryIcon(currentQuote.category)}</span>
           <div className={`badge ${getCategoryColor(currentQuote.category)} badge-lg capitalize`}>
@@ -108,12 +108,12 @@ export function InspirationalQuote() {
       </div>
 
       <div className={`transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-        <blockquote className="text-base sm:text-lg lg:text-xl italic text-base-content/90 mb-3 sm:mb-4 leading-relaxed">
+        <blockquote className="text-base italic text-base-content/90 mb-2 leading-relaxed">
           "{currentQuote.text}"
         </blockquote>
         
         <div className="text-right">
-          <cite className="text-sm sm:text-base text-base-content/70 font-medium">
+          <cite className="text-sm text-base-content/70 font-medium">
             — {currentQuote.author}
           </cite>
         </div>
