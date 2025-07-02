@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Habit, HabitTrackerState, HabitSettings } from '../types';
 import { HabitCategory, HabitPriority } from '../types';
-
-const STORAGE_KEY = 'habit-tracker-state';
+import { supabase } from '../lib/supabase';
 
 const defaultHabits: Habit[] = [
   { 
@@ -153,29 +152,88 @@ const calculateStreak = (completed: boolean[]): number => {
 };
 
 export const useHabitTracker = () => {
-  const [state, setState] = useState<HabitTrackerState>(() => {
-    const savedState = localStorage.getItem(STORAGE_KEY);
-    if (savedState) {
-      return JSON.parse(savedState);
+  const [state, setState] = useState<HabitTrackerState>({
+    habits: defaultHabits,
+    currentDate: new Date().toISOString().split('T')[0],
+    currentWeek: getCurrentWeek(),
+    statistics: {
+      totalCompletionRate: 0,
+      weeklyCompletionRate: 0,
+      bestHabit: '',
+      worstHabit: '',
+      longestStreak: 0,
     }
-    return {
-      habits: defaultHabits,
-      currentDate: new Date().toISOString().split('T')[0],
-      currentWeek: getCurrentWeek(),
-      statistics: {
-        totalCompletionRate: 0,
-        weeklyCompletionRate: 0,
-        bestHabit: '',
-        worstHabit: '',
-        longestStreak: 0,
-      }
-    };
+  });
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [userId] = useState(() => {
+    // Pegar userId do localStorage ou gerar um novo
+    let storedUserId = localStorage.getItem('user-id');
+    if (!storedUserId) {
+      storedUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('user-id', storedUserId);
+    }
+    return storedUserId;
   });
 
-  // Salvar o estado no localStorage sempre que ele mudar
+  // Carregar dados do Supabase na inicialização
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
+    loadFromSupabase();
+  }, []);
+
+  // Salvar no Supabase sempre que o estado mudar (com debounce)
+  useEffect(() => {
+    if (!isLoading) {
+      const timeoutId = setTimeout(() => {
+        saveToSupabase();
+      }, 1000); // Debounce de 1 segundo
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [state, isLoading]);
+
+  const loadFromSupabase = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('habits_data')
+        .select('habit_data')
+        .eq('user_id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = row not found
+        console.error('Erro ao carregar dados:', error);
+        setIsLoading(false);
+        return;
+      }
+
+      if (data && data.habit_data) {
+        setState(data.habit_data);
+      }
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Erro ao conectar com Supabase:', error);
+      setIsLoading(false);
+    }
+  };
+
+  const saveToSupabase = async () => {
+    try {
+      const { error } = await supabase
+        .from('habits_data')
+        .upsert({
+          user_id: userId,
+          habit_data: state,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) {
+        console.error('Erro ao salvar dados:', error);
+      }
+    } catch (error) {
+      console.error('Erro ao conectar com Supabase:', error);
+    }
+  };
 
   // Verificar se a semana mudou e resetar os hábitos se necessário
   useEffect(() => {
@@ -336,11 +394,14 @@ export const useHabitTracker = () => {
     habits: state.habits,
     currentWeek: state.currentWeek,
     statistics: state.statistics,
+    isLoading,
+    userId,
     toggleHabitCompletion,
     addHabit,
     removeHabit,
     updateHabit,
     exportData,
-    importData
+    importData,
+    refreshData: loadFromSupabase
   };
 }; 

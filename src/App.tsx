@@ -6,28 +6,46 @@ import { HabitStats } from './components/HabitStats';
 import { ThemeToggle } from './components/ThemeToggle';
 import { DataControls } from './components/DataControls';
 import { InstagramTracker } from './components/InstagramTracker';
-import { SyncSettings } from './components/SyncSettings';
+
 import { LoginScreen } from './components/LoginScreen';
 import { DashboardHeader } from './components/DashboardHeader';
 import { InspirationalQuote } from './components/InspirationalQuote';
+import { UserIdSetup } from './components/UserIdSetup';
 import { HabitCategory, HabitPriority } from './types';
 import './App.css';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [needsUserIdSetup, setNeedsUserIdSetup] = useState(() => {
+    // Verificar se já existe um user-id configurado
+    return !localStorage.getItem('user-id');
+  });
   const { 
     habits, 
     currentWeek, 
     statistics,
+    isLoading,
+    userId,
     toggleHabitCompletion, 
     addHabit, 
     removeHabit,
     updateHabit,
     exportData,
-    importData
+    importData,
+    refreshData
   } = useHabitTracker();
 
   const [activeTab, setActiveTab] = useState<'habits' | 'stats' | 'instagram' | 'settings'>('habits');
+
+  const handleUserIdSetup = (newUserId: string) => {
+    localStorage.setItem('user-id', newUserId);
+    setNeedsUserIdSetup(false);
+  };
+
+  // Mostrar configuração de User ID se necessário
+  if (needsUserIdSetup) {
+    return <UserIdSetup onSetUserId={handleUserIdSetup} />;
+  }
 
   // Mostrar tela de login se não estiver logado
   if (!isLoggedIn) {
@@ -45,7 +63,21 @@ function App() {
 
         <header className="navbar bg-base-100 rounded-box mb-6 shadow-lg">
           <div className="flex-1">
-            <h1 className="text-2xl font-bold px-4">Dashboard</h1>
+            <div>
+              <h1 className="text-2xl font-bold px-4">Dashboard</h1>
+              <div className="px-4 text-xs text-base-content/50 flex items-center gap-2">
+                <span>🔗 {userId}</span>
+                {isLoading && <span className="loading loading-spinner loading-xs"></span>}
+                <button 
+                  onClick={refreshData}
+                  className="btn btn-ghost btn-xs"
+                  title="Sincronizar dados"
+                  disabled={isLoading}
+                >
+                  🔄
+                </button>
+              </div>
+            </div>
           </div>
           <div className="flex-none gap-2">
             <button 
@@ -99,8 +131,76 @@ function App() {
         {activeTab === 'settings' && (
           <div className="space-y-6">
             <DataControls onExport={exportData} onImport={importData} />
-            <div className="divider">Sincronização</div>
-            <SyncSettings />
+            
+            <div className="divider">Informações da Conta</div>
+            
+            <div className="bg-base-100 rounded-box p-6 space-y-4">
+              <h3 className="text-lg font-semibold">🔗 Sincronização Automática</h3>
+              
+              <div className="alert alert-success">
+                <div>
+                  <h4 className="font-semibold">✅ Supabase Ativo</h4>
+                  <p className="text-sm">Seus dados são sincronizados automaticamente entre todos os dispositivos.</p>
+                </div>
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Seu ID de Usuário</span>
+                </label>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    value={userId}
+                    className="input input-bordered flex-1"
+                    readOnly
+                  />
+                  <button
+                    className="btn btn-square"
+                    onClick={() => navigator.clipboard.writeText(userId)}
+                    title="Copiar ID"
+                  >
+                    📋
+                  </button>
+                  <button
+                    className="btn btn-outline"
+                    onClick={() => {
+                      if (confirm('Tem certeza que deseja alterar seu ID? Você perderá acesso aos dados atuais neste dispositivo.')) {
+                        localStorage.removeItem('user-id');
+                        setNeedsUserIdSetup(true);
+                      }
+                    }}
+                    title="Alterar ID"
+                  >
+                    ✏️
+                  </button>
+                </div>
+                <div className="label">
+                  <span className="label-text-alt">
+                    Use este mesmo ID em outros dispositivos para acessar seus dados
+                  </span>
+                </div>
+              </div>
+
+              <div className="stats shadow">
+                <div className="stat">
+                  <div className="stat-title">Status</div>
+                  <div className="stat-value text-sm flex items-center gap-2">
+                    {isLoading ? (
+                      <>
+                        <span className="loading loading-spinner loading-sm"></span>
+                        Sincronizando
+                      </>
+                    ) : (
+                      <>
+                        ✅ Sincronizado
+                      </>
+                    )}
+                  </div>
+                  <div className="stat-desc">Dados salvos na nuvem</div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

@@ -1,35 +1,104 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { InstagramData, InstagramStats } from '../types';
-
-const STORAGE_KEY = 'instagram-tracker-data';
+import { supabase } from '../lib/supabase';
 
 export const useInstagramTracker = () => {
   const [data, setData] = useState<InstagramData[]>([]);
-
-  // Carregar dados do localStorage
-  useEffect(() => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        setData(parsedData);
-      } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-        // Inicializar com dados históricos se não houver dados salvos
-        initializeWithHistoricalData();
-      }
-    } else {
-      // Inicializar com dados históricos
-      initializeWithHistoricalData();
+  const [isLoading, setIsLoading] = useState(true);
+  const [userId] = useState(() => {
+    // Usar o mesmo userId dos hábitos
+    let storedUserId = localStorage.getItem('user-id');
+    if (!storedUserId) {
+      storedUserId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('user-id', storedUserId);
     }
+    return storedUserId;
+  });
+
+  // Carregar dados do Supabase na inicialização
+  useEffect(() => {
+    loadFromSupabase();
   }, []);
 
-  // Salvar dados no localStorage sempre que mudarem
+  // Salvar no Supabase sempre que os dados mudarem (com debounce)
   useEffect(() => {
-    if (data.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    if (!isLoading && data.length > 0) {
+      const timeoutId = setTimeout(() => {
+        saveToSupabase();
+      }, 1000); // Debounce de 1 segundo
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [data]);
+  }, [data, isLoading]);
+
+  const loadFromSupabase = async () => {
+    try {
+      const { data: supabaseData, error } = await supabase
+        .from('instagram_data')
+        .select('*')
+        .eq('user_id', userId)
+        .order('date', { ascending: true });
+
+      if (error) {
+        console.error('Erro ao carregar dados do Instagram:', error);
+        // Se não há dados, inicializar com dados históricos
+        initializeWithHistoricalData();
+        return;
+      }
+
+      if (supabaseData && supabaseData.length > 0) {
+        const instagramData: InstagramData[] = supabaseData.map(item => ({
+          id: item.id,
+          date: item.date,
+          followers: item.followers,
+          following: item.following || undefined,
+          posts: item.posts || undefined,
+          notes: item.notes || undefined,
+        }));
+        setData(instagramData);
+      } else {
+        // Se não há dados, inicializar com dados históricos
+        initializeWithHistoricalData();
+      }
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Erro ao conectar com Supabase:', error);
+      initializeWithHistoricalData();
+      setIsLoading(false);
+    }
+  };
+
+  const saveToSupabase = async () => {
+    try {
+      // Deletar dados antigos do usuário
+      await supabase
+        .from('instagram_data')
+        .delete()
+        .eq('user_id', userId);
+
+      // Inserir novos dados
+      const supabaseData = data.map(item => ({
+        id: item.id,
+        user_id: userId,
+        date: item.date,
+        followers: item.followers,
+        following: item.following,
+        posts: item.posts,
+        notes: item.notes,
+      }));
+
+      const { error } = await supabase
+        .from('instagram_data')
+        .insert(supabaseData);
+
+      if (error) {
+        console.error('Erro ao salvar dados do Instagram:', error);
+      }
+    } catch (error) {
+      console.error('Erro ao conectar com Supabase:', error);
+    }
+  };
 
   const initializeWithHistoricalData = () => {
     const historicalData: InstagramData[] = [
@@ -186,19 +255,31 @@ export const useInstagramTracker = () => {
     reader.readAsText(file);
   };
 
-  const clearAllData = () => {
-    setData([]);
-    localStorage.removeItem(STORAGE_KEY);
+  const clearAllData = async () => {
+    try {
+      // Limpar dados do Supabase
+      await supabase
+        .from('instagram_data')
+        .delete()
+        .eq('user_id', userId);
+      
+      setData([]);
+    } catch (error) {
+      console.error('Erro ao limpar dados:', error);
+    }
   };
 
   return {
     data,
     stats,
+    isLoading,
+    userId,
     addEntry,
     deleteEntry,
     updateEntry,
     exportData,
     importData,
-    clearAllData
+    clearAllData,
+    refreshData: loadFromSupabase
   };
 }; 
