@@ -2,7 +2,7 @@ export type Habit = {
   id: string;
   name: string;
   description?: string;
-  completed: boolean[];
+  completedDates: Record<string, boolean>; // Mudança: armazenar por data específica (YYYY-MM-DD)
   category: HabitCategory;
   priority: HabitPriority;
   goal: number;

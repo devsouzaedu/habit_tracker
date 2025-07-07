@@ -1,66 +1,15 @@
 import { useState, useEffect } from 'react';
-import type { Habit, HabitTrackerState, HabitSettings } from '../types';
+import type { Habit, HabitTrackerState } from '../types';
 import { HabitCategory, HabitPriority } from '../types';
 import { supabase } from '../lib/supabase';
 
+// Lista fixa de hábitos conforme especificado pelo usuário
 const defaultHabits: Habit[] = [
   { 
     id: '1', 
-    name: 'Trabalho', 
-    category: HabitCategory.WORK, 
-    completed: [false, false, false, false, false, false, false],
-    priority: HabitPriority.MEDIUM,
-    goal: 7,
-    color: '#4338ca',
-    icon: '💼',
-    notes: '',
-    streak: 0,
-    bestStreak: 0
-  },
-  { 
-    id: '2', 
-    name: 'Leitura', 
-    category: HabitCategory.LEITURA, 
-    completed: [false, false, false, false, false, false, false],
-    priority: HabitPriority.HIGH,
-    goal: 5,
-    color: '#0891b2',
-    icon: '📚',
-    notes: '',
-    streak: 0,
-    bestStreak: 0
-  },
-  { 
-    id: '3', 
-    name: 'Escrita', 
-    category: HabitCategory.ESCRITA, 
-    completed: [false, false, false, false, false, false, false],
-    priority: HabitPriority.MEDIUM,
-    goal: 3,
-    color: '#4f46e5',
-    icon: '✏️',
-    notes: '',
-    streak: 0,
-    bestStreak: 0
-  },
-  { 
-    id: '4', 
-    name: 'Duolingo', 
-    category: HabitCategory.DUOLINGO, 
-    completed: [false, false, false, false, false, false, false],
-    priority: HabitPriority.MEDIUM,
-    goal: 7,
-    color: '#65a30d',
-    icon: '🗣️',
-    notes: '',
-    streak: 0,
-    bestStreak: 0
-  },
-  { 
-    id: '5', 
-    name: 'Academia', 
+    name: 'Gym', 
     category: HabitCategory.GYM, 
-    completed: [false, false, false, false, false, false, false],
+    completedDates: {},
     priority: HabitPriority.HIGH,
     goal: 4,
     color: '#dc2626',
@@ -70,36 +19,62 @@ const defaultHabits: Habit[] = [
     bestStreak: 0
   },
   { 
-    id: '6', 
-    name: 'Água 2L', 
-    category: HabitCategory.AGUA, 
-    completed: [false, false, false, false, false, false, false],
+    id: '2', 
+    name: 'Duolingo', 
+    category: HabitCategory.DUOLINGO, 
+    completedDates: {},
+    priority: HabitPriority.MEDIUM,
+    goal: 7,
+    color: '#65a30d',
+    icon: '🗣️',
+    notes: '',
+    streak: 0,
+    bestStreak: 0
+  },
+  { 
+    id: '3', 
+    name: 'Read', 
+    category: HabitCategory.LEITURA, 
+    completedDates: {},
     priority: HabitPriority.HIGH,
-    goal: 7,
-    color: '#0ea5e9',
-    icon: '💧',
+    goal: 5,
+    color: '#0891b2',
+    icon: '📚',
     notes: '',
     streak: 0,
     bestStreak: 0
   },
   { 
-    id: '7', 
-    name: 'Menos Zaza (Max 6)', 
-    category: HabitCategory.LESS_ZAZA, 
-    completed: [false, false, false, false, false, false, false],
-    priority: HabitPriority.LOW,
-    goal: 7,
-    color: '#6366f1',
-    icon: '🚭',
+    id: '4', 
+    name: 'Write', 
+    category: HabitCategory.ESCRITA, 
+    completedDates: {},
+    priority: HabitPriority.MEDIUM,
+    goal: 3,
+    color: '#4f46e5',
+    icon: '✏️',
     notes: '',
     streak: 0,
     bestStreak: 0
   },
   { 
-    id: '8', 
+    id: '5', 
+    name: 'Work 8hrs', 
+    category: HabitCategory.WORK, 
+    completedDates: {},
+    priority: HabitPriority.MEDIUM,
+    goal: 5,
+    color: '#4338ca',
+    icon: '💼',
+    notes: '',
+    streak: 0,
+    bestStreak: 0
+  },
+  { 
+    id: '6', 
     name: 'No PMO', 
     category: HabitCategory.NO_PMO, 
-    completed: [false, false, false, false, false, false, false],
+    completedDates: {},
     priority: HabitPriority.MEDIUM,
     goal: 7,
     color: '#f97316',
@@ -109,10 +84,10 @@ const defaultHabits: Habit[] = [
     bestStreak: 0
   },
   { 
-    id: '9', 
+    id: '7', 
     name: 'No MST', 
     category: HabitCategory.NO_MST, 
-    completed: [false, false, false, false, false, false, false],
+    completedDates: {},
     priority: HabitPriority.LOW,
     goal: 7,
     color: '#8b5cf6',
@@ -122,10 +97,36 @@ const defaultHabits: Habit[] = [
     bestStreak: 0
   },
   { 
+    id: '8', 
+    name: 'Less Zaza max 8', 
+    category: HabitCategory.LESS_ZAZA, 
+    completedDates: {},
+    priority: HabitPriority.LOW,
+    goal: 7,
+    color: '#6366f1',
+    icon: '🚭',
+    notes: '',
+    streak: 0,
+    bestStreak: 0
+  },
+  { 
+    id: '9', 
+    name: 'Water', 
+    category: HabitCategory.AGUA, 
+    completedDates: {},
+    priority: HabitPriority.HIGH,
+    goal: 7,
+    color: '#0ea5e9',
+    icon: '💧',
+    notes: '',
+    streak: 0,
+    bestStreak: 0
+  },
+  { 
     id: '10', 
-    name: 'Estudo', 
+    name: 'Study', 
     category: HabitCategory.ESTUDO, 
-    completed: [false, false, false, false, false, false, false],
+    completedDates: {},
     priority: HabitPriority.HIGH,
     goal: 5,
     color: '#059669',
@@ -138,7 +139,7 @@ const defaultHabits: Habit[] = [
     id: '11', 
     name: 'Casacare', 
     category: HabitCategory.CASACARE, 
-    completed: [false, false, false, false, false, false, false],
+    completedDates: {},
     priority: HabitPriority.MEDIUM,
     goal: 4,
     color: '#7c3aed',
@@ -149,13 +150,13 @@ const defaultHabits: Habit[] = [
   },
   { 
     id: '12', 
-    name: 'Conteudo', 
+    name: 'Relax', 
     category: HabitCategory.CONTEUDO, 
-    completed: [false, false, false, false, false, false, false],
-    priority: HabitPriority.HIGH,
+    completedDates: {},
+    priority: HabitPriority.MEDIUM,
     goal: 6,
     color: '#ea580c',
-    icon: '🎬',
+    icon: '🧘‍♂️',
     notes: '',
     streak: 0,
     bestStreak: 0
@@ -177,17 +178,50 @@ const getCurrentWeek = (): string[] => {
   return weekDays;
 };
 
-// Função para calcular a sequência atual de um hábito
-const calculateStreak = (completed: boolean[]): number => {
+// Função para calcular a sequência atual de um hábito baseado nas datas completadas
+const calculateStreak = (completedDates: Record<string, boolean>): number => {
+  const today = new Date();
   let streak = 0;
-  for (let i = 0; i < completed.length; i++) {
-    if (completed[i]) {
+  
+  // Verificar consecutivamente a partir de hoje para trás
+  for (let i = 0; i < 365; i++) { // Máximo de 1 ano
+    const checkDate = new Date(today);
+    checkDate.setDate(today.getDate() - i);
+    const dateStr = checkDate.toISOString().split('T')[0];
+    
+    if (completedDates[dateStr]) {
       streak++;
     } else {
       break;
     }
   }
+  
   return streak;
+};
+
+// Função para migrar dados antigos (se existirem) para o novo formato
+const migrateOldData = (habits: any[]): Habit[] => {
+  return habits.map(habit => {
+    if (habit.completed && Array.isArray(habit.completed)) {
+      // Migrar dados antigos: converter array semanal para datas específicas
+      const completedDates: Record<string, boolean> = {};
+      const currentWeek = getCurrentWeek();
+      
+      habit.completed.forEach((completed: boolean, index: number) => {
+        if (completed && currentWeek[index]) {
+          completedDates[currentWeek[index]] = true;
+        }
+      });
+      
+      return {
+        ...habit,
+        completedDates,
+        completed: undefined // Remover campo antigo
+      };
+    }
+    
+    return habit;
+  });
 };
 
 export const useHabitTracker = () => {
@@ -240,7 +274,16 @@ export const useHabitTracker = () => {
 
       if (data && data.habit_data) {
         console.log('✅ Dados dos hábitos carregados:', data.habit_data);
-        setState(data.habit_data);
+        
+        // Verificar se precisa migrar dados antigos
+        const loadedHabits = data.habit_data.habits || defaultHabits;
+        const migratedHabits = migrateOldData(loadedHabits);
+        
+        setState({
+          ...data.habit_data,
+          habits: migratedHabits,
+          currentWeek: getCurrentWeek() // Sempre atualizar a semana atual
+        });
       } else {
         console.log('📝 Nenhum dado encontrado, usando dados padrão');
       }
@@ -291,37 +334,37 @@ export const useHabitTracker = () => {
     }
   };
 
-  // Verificar se a semana mudou e resetar os hábitos se necessário
-  useEffect(() => {
-    const currentWeek = getCurrentWeek();
-    if (currentWeek[0] !== state.currentWeek[0]) {
-      setState(prevState => ({
-        ...prevState,
-        currentWeek,
-        habits: prevState.habits.map(habit => ({
-          ...habit,
-          completed: [false, false, false, false, false, false, false],
-        })),
-      }));
-    }
-  }, [state.currentWeek]);
-
   // Atualizar estatísticas sempre que os hábitos mudarem
   useEffect(() => {
     updateStatistics();
   }, [state.habits]);
 
   const updateStatistics = () => {
-    const totalChecks = state.habits.reduce(
-      (total, habit) => total + habit.completed.filter(Boolean).length, 
-      0
-    );
-    const totalPossible = state.habits.length * 7;
-    const totalCompletionRate = totalPossible > 0 ? Math.round((totalChecks / totalPossible) * 100) : 0;
+    const currentWeek = getCurrentWeek();
+    
+    // Calcular estatísticas baseadas nas datas completadas
+    let totalChecksThisWeek = 0;
+    let totalPossibleThisWeek = 0;
+    
+    state.habits.forEach(habit => {
+      currentWeek.forEach(date => {
+        totalPossibleThisWeek++;
+        if (habit.completedDates[date]) {
+          totalChecksThisWeek++;
+        }
+      });
+      
+      // Atualizar streak do hábito
+      const streak = calculateStreak(habit.completedDates);
+      habit.streak = streak;
+      habit.bestStreak = Math.max(habit.bestStreak || 0, streak);
+    });
 
-    // Calcular a taxa de conclusão semanal
+    const totalCompletionRate = totalPossibleThisWeek > 0 ? Math.round((totalChecksThisWeek / totalPossibleThisWeek) * 100) : 0;
+
+    // Calcular a taxa de conclusão semanal (quantos hábitos foram feitos pelo menos uma vez)
     const completedThisWeek = state.habits.reduce(
-      (total, habit) => total + (habit.completed.some(Boolean) ? 1 : 0),
+      (total, habit) => total + (currentWeek.some(date => habit.completedDates[date]) ? 1 : 0),
       0
     );
     const weeklyCompletionRate = state.habits.length > 0 ? Math.round((completedThisWeek / state.habits.length) * 100) : 0;
@@ -334,12 +377,14 @@ export const useHabitTracker = () => {
     let longestStreak = 0;
 
     state.habits.forEach(habit => {
-      const completionRate = habit.completed.filter(Boolean).length / 7 * 100;
+      const weekCompletions = currentWeek.filter(date => habit.completedDates[date]).length;
+      const completionRate = (weekCompletions / 7) * 100;
+      
       if (completionRate > bestRate) {
         bestRate = completionRate;
         bestHabit = habit.name;
       }
-      if (completionRate < worstRate && habit.completed.some(Boolean)) {
+      if (completionRate < worstRate && weekCompletions > 0) {
         worstRate = completionRate;
         worstHabit = habit.name;
       }
@@ -362,21 +407,26 @@ export const useHabitTracker = () => {
     }));
   };
 
-  const toggleHabitCompletion = (habitId: string, dayIndex: number) => {
+  const toggleHabitCompletion = (habitId: string, date: string) => {
     setState(prevState => ({
       ...prevState,
       habits: prevState.habits.map(habit => {
         if (habit.id === habitId) {
-          const newCompleted = [...habit.completed];
-          newCompleted[dayIndex] = !newCompleted[dayIndex];
+          const newCompletedDates = { ...habit.completedDates };
           
-          // Atualizar streak
-          const streak = calculateStreak(newCompleted);
+          if (newCompletedDates[date]) {
+            delete newCompletedDates[date]; // Remover se já estava marcado
+          } else {
+            newCompletedDates[date] = true; // Adicionar se não estava marcado
+          }
+          
+          // Recalcular streak
+          const streak = calculateStreak(newCompletedDates);
           const bestStreak = Math.max(habit.bestStreak || 0, streak);
           
           return { 
             ...habit, 
-            completed: newCompleted,
+            completedDates: newCompletedDates,
             streak,
             bestStreak
           };
@@ -386,32 +436,16 @@ export const useHabitTracker = () => {
     }));
   };
 
-  const addHabit = (name: string, category: HabitCategory, settings?: HabitSettings) => {
-    const newHabit: Habit = {
-      id: Date.now().toString(),
-      name,
-      category,
-      completed: [false, false, false, false, false, false, false],
-      priority: settings?.priority || HabitPriority.MEDIUM,
-      goal: settings?.goal || 7,
-      color: settings?.color || '#3b82f6',
-      icon: settings?.icon || '✅',
-      notes: settings?.notes || '',
-      streak: 0,
-      bestStreak: 0
-    };
-
-    setState(prevState => ({
-      ...prevState,
-      habits: [...prevState.habits, newHabit],
-    }));
+  // Função para obter status de um hábito em uma data específica
+  const isHabitCompletedOnDate = (habitId: string, date: string): boolean => {
+    const habit = state.habits.find(h => h.id === habitId);
+    return habit ? !!habit.completedDates[date] : false;
   };
 
-  const removeHabit = (habitId: string) => {
-    setState(prevState => ({
-      ...prevState,
-      habits: prevState.habits.filter(habit => habit.id !== habitId),
-    }));
+  // Função para obter todas as datas em que um hábito foi completado
+  const getHabitCompletedDates = (habitId: string): string[] => {
+    const habit = state.habits.find(h => h.id === habitId);
+    return habit ? Object.keys(habit.completedDates).filter(date => habit.completedDates[date]) : [];
   };
 
   const updateHabit = (habitId: string, updates: Partial<Habit>) => {
@@ -438,6 +472,10 @@ export const useHabitTracker = () => {
   const importData = (jsonData: string) => {
     try {
       const importedState = JSON.parse(jsonData);
+      // Migrar dados se necessário
+      if (importedState.habits) {
+        importedState.habits = migrateOldData(importedState.habits);
+      }
       setState(importedState);
       return true;
     } catch (error) {
@@ -453,11 +491,12 @@ export const useHabitTracker = () => {
     isLoading,
     userId,
     toggleHabitCompletion,
-    addHabit,
-    removeHabit,
     updateHabit,
     exportData,
     importData,
-    refreshData: loadFromSupabase
+    refreshData: loadFromSupabase,
+    isHabitCompletedOnDate,
+    getHabitCompletedDates,
+    // Removidas as funções addHabit e removeHabit conforme solicitado
   };
 }; 

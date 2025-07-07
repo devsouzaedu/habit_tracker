@@ -9,13 +9,15 @@ type HabitStatsProps = {
     worstHabit: string;
     longestStreak: number;
   };
+  currentWeek: string[];
 };
 
-export const HabitStats = ({ habits, statistics }: HabitStatsProps) => {
+export const HabitStats = ({ habits, statistics, currentWeek }: HabitStatsProps) => {
   const getDailyCompletionRates = () => {
     const dailyRates = [];
     for (let i = 0; i < 7; i++) {
-      const completedForDay = habits.filter(habit => habit.completed[i]).length;
+      const date = currentWeek[i];
+      const completedForDay = habits.filter(habit => habit.completedDates[date]).length;
       const rate = habits.length > 0 ? Math.round((completedForDay / habits.length) * 100) : 0;
       dailyRates.push(rate);
     }
@@ -31,8 +33,8 @@ export const HabitStats = ({ habits, statistics }: HabitStatsProps) => {
       }
       
       const categoryStats = categories.get(habit.category)!;
-      categoryStats.total += 7;
-      categoryStats.completed += habit.completed.filter(Boolean).length;
+      categoryStats.total += currentWeek.length;
+      categoryStats.completed += currentWeek.filter(date => habit.completedDates[date]).length;
     });
     
     const result = Array.from(categories.entries()).map(([category, stats]) => ({
@@ -52,8 +54,8 @@ export const HabitStats = ({ habits, statistics }: HabitStatsProps) => {
       }
       
       const priorityStats = priorities.get(habit.priority)!;
-      priorityStats.total += 7;
-      priorityStats.completed += habit.completed.filter(Boolean).length;
+      priorityStats.total += currentWeek.length;
+      priorityStats.completed += currentWeek.filter(date => habit.completedDates[date]).length;
     });
     
     const result = Array.from(priorities.entries()).map(([priority, stats]) => ({
@@ -66,12 +68,15 @@ export const HabitStats = ({ habits, statistics }: HabitStatsProps) => {
 
   const getTopHabits = () => {
     return habits
-      .map(habit => ({
-        name: habit.name,
-        rate: habit.completed.filter(Boolean).length / 7 * 100,
-        streak: habit.streak,
-        bestStreak: habit.bestStreak
-      }))
+      .map(habit => {
+        const weekCompletions = currentWeek.filter(date => habit.completedDates[date]).length;
+        return {
+          name: habit.name,
+          rate: (weekCompletions / 7) * 100,
+          streak: habit.streak,
+          bestStreak: habit.bestStreak
+        };
+      })
       .sort((a, b) => b.rate - a.rate)
       .slice(0, 3);
   };
@@ -80,7 +85,12 @@ export const HabitStats = ({ habits, statistics }: HabitStatsProps) => {
   const categoryRates = getCategoryCompletionRates();
   const priorityRates = getPriorityCompletionRates();
   const topHabits = getTopHabits();
-  const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  
+  // Gerar labels dos dias baseados nas datas reais
+  const weekDayLabels = currentWeek.map(dateStr => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('pt-BR', { weekday: 'short' });
+  });
 
   return (
     <div className="space-y-6">
@@ -119,7 +129,7 @@ export const HabitStats = ({ habits, statistics }: HabitStatsProps) => {
           <div className="grid grid-cols-7 gap-1">
             {dailyRates.map((rate, index) => (
               <div key={index} className="flex flex-col items-center">
-                <div className="text-xs mb-1">{weekDays[index]}</div>
+                <div className="text-xs mb-1">{weekDayLabels[index]}</div>
                 <div 
                   className="radial-progress text-primary" 
                   style={{"--value": rate, "--size": "3rem", "--thickness": "0.5rem"} as React.CSSProperties}

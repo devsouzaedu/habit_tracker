@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useHabitTracker } from './hooks/useHabitTracker';
 import { HabitItem } from './components/HabitItem';
 import { HabitStats } from './components/HabitStats';
@@ -10,21 +10,39 @@ import { LoginScreen } from './components/LoginScreen';
 import { DashboardHeader } from './components/DashboardHeader';
 import { InspirationalQuote } from './components/InspirationalQuote';
 
-import { HabitCategory, HabitPriority } from './types';
 import './App.css';
+
+// Função para gerar semana baseada em uma data específica
+const getWeekFromDate = (date: Date): string[] => {
+  const weekDays = [];
+  const startOfWeek = new Date(date);
+  
+  // Ajustar para começar na segunda-feira (ou manter como está se preferir domingo)
+  const dayOfWeek = startOfWeek.getDay();
+  const diff = startOfWeek.getDate() - dayOfWeek;
+  startOfWeek.setDate(diff);
+  
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(startOfWeek);
+    day.setDate(startOfWeek.getDate() + i);
+    weekDays.push(day.toISOString().split('T')[0]);
+  }
+  
+  return weekDays;
+};
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     // Verificar se já está logado neste dispositivo
     return localStorage.getItem('dashboard-authenticated') === 'true';
   });
+  
   const { 
     habits, 
     currentWeek, 
     statistics,
     isLoading,
     toggleHabitCompletion, 
-    removeHabit,
     updateHabit,
     exportData,
     importData,
@@ -32,10 +50,38 @@ function App() {
   } = useHabitTracker();
 
   const [activeTab, setActiveTab] = useState<'habits' | 'stats' | 'instagram' | 'settings'>('habits');
+  const [viewDate, setViewDate] = useState(new Date()); // Data para visualização
+  const [viewWeek, setViewWeek] = useState<string[]>([]); // Semana sendo visualizada
+
+  // Atualizar semana de visualização quando viewDate muda
+  useEffect(() => {
+    setViewWeek(getWeekFromDate(viewDate));
+  }, [viewDate]);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
     localStorage.setItem('dashboard-authenticated', 'true');
+  };
+
+  // Função para navegar entre semanas
+  const navigateWeek = (direction: 'prev' | 'next') => {
+    const newDate = new Date(viewDate);
+    newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+    setViewDate(newDate);
+    setViewWeek(getWeekFromDate(newDate));
+  };
+
+  // Função para voltar para a semana atual
+  const goToCurrentWeek = () => {
+    const today = new Date();
+    setViewDate(today);
+    setViewWeek(getWeekFromDate(today));
+  };
+
+  // Verificar se estamos visualizando a semana atual
+  const isCurrentWeek = () => {
+    const today = new Date().toISOString().split('T')[0];
+    return viewWeek.includes(today);
   };
 
   // Mostrar tela de login se não estiver logado
@@ -43,179 +89,183 @@ function App() {
     return <LoginScreen onLogin={handleLogin} />;
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="loading loading-spinner loading-lg"></div>
+        <span className="ml-4">Carregando seus dados...</span>
+      </div>
+    );
+  }
+
+  // Usar a semana atual ou a semana de visualização dependendo da aba
+  const displayWeek = activeTab === 'habits' ? (viewWeek.length > 0 ? viewWeek : currentWeek) : currentWeek;
+
   return (
-    <div className="min-h-screen bg-base-200 p-1 sm:p-2">
-      <div className="container mx-auto max-w-4xl">
-        {/* Header com data, hora e clima */}
-        <DashboardHeader />
-
-        {/* Frase inspiracional */}
+    <div className="min-h-screen bg-base-200">
+      <DashboardHeader />
+      
+      <div className="container mx-auto p-4 max-w-4xl">
         <InspirationalQuote />
-
-        <header className="navbar bg-base-100 rounded-box mb-2 shadow-lg p-2">
-          <div className="flex-1">
-            <div>
-              <h1 className="text-xl font-bold px-2">Dashboard</h1>
-              <div className="px-2 text-xs text-base-content/50 flex items-center gap-2">
-                <span>👤 J.M.SOUZA</span>
-                {isLoading && <span className="loading loading-spinner loading-xs"></span>}
-                <button 
-                  onClick={refreshData}
-                  className="btn btn-ghost btn-xs"
-                  title="Sincronizar dados"
-                  disabled={isLoading}
-                >
-                  🔄
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="flex-none">
-            <ThemeToggle />
-          </div>
-        </header>
-
-        <div className="tabs tabs-boxed mb-2 text-sm">
-          <a 
+        
+        {/* Navegação por abas */}
+        <div className="tabs tabs-boxed mb-6 justify-center">
+          <button 
             className={`tab ${activeTab === 'habits' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('habits')}
           >
-            Hábitos
-          </a>
-          <a 
+            📋 Hábitos
+          </button>
+          <button 
             className={`tab ${activeTab === 'stats' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('stats')}
           >
-            Estatísticas
-          </a>
-          <a 
+            📊 Estatísticas
+          </button>
+          <button 
             className={`tab ${activeTab === 'instagram' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('instagram')}
           >
-            📈 Instagram
-          </a>
-          <a 
+            📸 Instagram
+          </button>
+          <button 
             className={`tab ${activeTab === 'settings' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('settings')}
           >
-            Configurações
-          </a>
+            ⚙️ Configurações
+          </button>
         </div>
 
+        {/* Conteúdo das abas */}
+        {activeTab === 'habits' && (
+          <div>
+            {/* Navegação de semanas */}
+            <div className="card bg-base-100 shadow-md mb-6">
+              <div className="card-body p-4">
+                <div className="flex items-center justify-between">
+                  <button 
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => navigateWeek('prev')}
+                  >
+                    ← Semana Anterior
+                  </button>
+                  
+                  <div className="text-center">
+                    <h3 className="font-semibold">
+                      {viewWeek.length > 0 && (
+                        <>
+                          {new Date(viewWeek[0]).toLocaleDateString('pt-BR', { 
+                            day: '2-digit', 
+                            month: 'short' 
+                          })} - {new Date(viewWeek[6]).toLocaleDateString('pt-BR', { 
+                            day: '2-digit', 
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </>
+                      )}
+                    </h3>
+                    {!isCurrentWeek() && (
+                      <button 
+                        className="btn btn-xs btn-primary mt-1"
+                        onClick={goToCurrentWeek}
+                      >
+                        Ir para Semana Atual
+                      </button>
+                    )}
+                    {isCurrentWeek() && (
+                      <span className="badge badge-primary badge-sm mt-1">Semana Atual</span>
+                    )}
+                  </div>
+                  
+                  <button 
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => navigateWeek('next')}
+                  >
+                    Próxima Semana →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-4">Seus Hábitos Diários</h2>
+              <p className="text-base-content/70 mb-4">
+                {isCurrentWeek() 
+                  ? "Marque os hábitos conforme você os completa. Os dados são salvos automaticamente."
+                  : "Visualizando histórico de hábitos. Use a navegação acima para ver outras semanas."
+                }
+              </p>
+            </div>
+
+            {habits.map((habit) => (
+              <HabitItem
+                key={habit.id}
+                habit={habit}
+                weekDays={displayWeek}
+                onToggle={toggleHabitCompletion}
+                onUpdate={updateHabit}
+              />
+            ))}
+
+            <div className="mt-8 text-center">
+              <p className="text-sm text-base-content/60">
+                💡 Dica: Use a navegação de semanas para ver seu histórico completo de hábitos!
+              </p>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'stats' && (
-          <HabitStats habits={habits} statistics={statistics} />
+          <HabitStats 
+            habits={habits} 
+            statistics={statistics}
+            currentWeek={currentWeek}
+          />
         )}
 
         {activeTab === 'instagram' && (
-                      <div className="bg-base-100 rounded-box p-3">
-              <InstagramTracker />
-            </div>
+          <InstagramTracker />
         )}
 
         {activeTab === 'settings' && (
-          <div className="space-y-3">
-            <DataControls onExport={exportData} onImport={importData} />
+          <div>
+            <h2 className="text-2xl font-bold mb-6">Configurações</h2>
             
-            <div className="divider">Informações do Sistema</div>
-            
-            <div className="bg-base-100 rounded-box p-3 space-y-3">
-                              <h3 className="text-base font-semibold">👤 Dashboard do J.M.SOUZA</h3>
-              
-              <div className="alert alert-success">
-                <div>
-                  <h4 className="font-semibold">✅ Supabase Ativo</h4>
-                  <p className="text-sm">Seus dados são sincronizados automaticamente entre todos os dispositivos.</p>
+            <div className="grid gap-6">
+              <div className="card bg-base-100 shadow-xl">
+                <div className="card-body">
+                  <h3 className="card-title">Aparência</h3>
+                  <ThemeToggle />
                 </div>
               </div>
 
-              <div className="stats shadow">
-                <div className="stat">
-                  <div className="stat-title">Status</div>
-                  <div className="stat-value text-sm flex items-center gap-2">
-                    {isLoading ? (
-                      <>
-                        <span className="loading loading-spinner loading-sm"></span>
-                        Sincronizando
-                      </>
-                    ) : (
-                      <>
-                        ✅ Sincronizado
-                      </>
-                    )}
-                  </div>
-                  <div className="stat-desc">Dados salvos na nuvem</div>
+              <div className="card bg-base-100 shadow-xl">
+                <div className="card-body">
+                  <h3 className="card-title">Backup e Restauração</h3>
+                  <DataControls 
+                    onExport={exportData}
+                    onImport={importData}
+                    onRefresh={refreshData}
+                  />
                 </div>
-                
-                <div className="stat">
-                  <div className="stat-title">Usuário</div>
-                  <div className="stat-value text-sm">J.M.SOUZA</div>
-                  <div className="stat-desc">Dashboard pessoal</div>
+              </div>
+
+              <div className="card bg-base-100 shadow-xl">
+                <div className="card-body">
+                  <h3 className="card-title">Informações</h3>
+                  <div className="space-y-2 text-sm">
+                    <p><strong>Versão:</strong> 2.0.0</p>
+                    <p><strong>Hábitos fixos:</strong> Sistema não permite adicionar/remover hábitos</p>
+                    <p><strong>Persistência:</strong> Dados salvos automaticamente no Supabase</p>
+                    <p><strong>Histórico:</strong> Mantém registro completo de todos os dias</p>
+                    <p><strong>Navegação:</strong> Use as setas para navegar entre semanas</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
-
-        {activeTab === 'habits' && (
-          <>
-            <div className="divider">Seus Hábitos</div>
-
-            {habits.length === 0 ? (
-              <div className="alert">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span>Você ainda não tem hábitos. Adicione um novo hábito para começar!</span>
-              </div>
-            ) : (
-              <div>
-                {Object.values(HabitCategory).map((category) => {
-                  const habitsInCategory = habits.filter((h) => h.category === category);
-                  if (habitsInCategory.length === 0) return null;
-                  
-                  return (
-                    <div key={category} className="mb-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h2 className="text-xl font-bold">{category}</h2>
-                        <div className="badge badge-neutral">
-                          {habitsInCategory.length} {habitsInCategory.length === 1 ? 'hábito' : 'hábitos'}
-                        </div>
-                      </div>
-                      
-                      {habitsInCategory
-                        .sort((a, b) => {
-                          // Ordenar por prioridade (HIGH > MEDIUM > LOW)
-                          const priorityOrder = { 
-                            [HabitPriority.HIGH]: 0, 
-                            [HabitPriority.MEDIUM]: 1, 
-                            [HabitPriority.LOW]: 2 
-                          };
-                          return priorityOrder[a.priority] - priorityOrder[b.priority];
-                        })
-                        .map((habit) => (
-                          <HabitItem
-                            key={habit.id}
-                            habit={habit}
-                            weekDays={currentWeek}
-                            onToggle={toggleHabitCompletion}
-                            onRemove={removeHabit}
-                            onUpdate={updateHabit}
-                          />
-                        ))
-                      }
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </>
-        )}
-
-        <footer className="footer footer-center p-2 bg-base-100 text-base-content rounded-box mt-4">
-          <div>
-            <p className="text-sm sm:text-base">© 2025 - Dashboard J.M.SOUZA</p>
-          </div>
-        </footer>
       </div>
     </div>
   );

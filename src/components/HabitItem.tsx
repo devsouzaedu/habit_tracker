@@ -5,116 +5,132 @@ import { HabitPriority } from '../types';
 type HabitItemProps = {
   habit: Habit;
   weekDays: string[];
-  onToggle: (habitId: string, dayIndex: number) => void;
-  onRemove: (habitId: string) => void;
-  onUpdate?: (habitId: string, updates: Partial<Habit>) => void;
+  onToggle: (habitId: string, date: string) => void; // Mudança: usar data ao invés de índice
+  onUpdate: (habitId: string, updates: Partial<Habit>) => void;
 };
 
-export const HabitItem = ({ habit, weekDays, onToggle, onRemove, onUpdate }: HabitItemProps) => {
+const getDayLabel = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  
+  if (date.toDateString() === today.toDateString()) {
+    return 'Hoje';
+  } else if (date.toDateString() === yesterday.toDateString()) {
+    return 'Ontem';
+  } else {
+    return date.toLocaleDateString('pt-BR', { 
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit'
+    });
+  }
+};
+
+export const HabitItem = ({ habit, weekDays, onToggle, onUpdate }: HabitItemProps) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
-  const [notes, setNotes] = useState(habit.notes);
-
-  const getDayLabel = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-    const weekDay = weekDays[date.getDay()];
-    return `${weekDay} ${day}`;
-  };
-
-  const getPriorityLabel = (priority: HabitPriority) => {
-    switch (priority) {
-      case HabitPriority.HIGH:
-        return <span className="badge badge-error">Alta</span>;
-      case HabitPriority.MEDIUM:
-        return <span className="badge badge-warning">Média</span>;
-      case HabitPriority.LOW:
-        return <span className="badge badge-info">Baixa</span>;
-      default:
-        return null;
-    }
-  };
-
-  const getProgressPercentage = () => {
-    const completed = habit.completed.filter(Boolean).length;
-    return Math.round((completed / habit.goal) * 100);
-  };
+  const [notes, setNotes] = useState(habit.notes || '');
 
   const saveNotes = () => {
-    if (onUpdate) {
-      onUpdate(habit.id, { notes });
-      setShowNotes(false);
-    }
+    onUpdate(habit.id, { notes });
+    setShowNotes(false);
   };
 
-  const progressPercentage = getProgressPercentage();
-  const isGoalMet = progressPercentage >= 100;
+  // Calcular progresso da semana
+  const weekProgress = weekDays.filter(date => habit.completedDates[date]).length;
+  const progressPercentage = (weekProgress / habit.goal) * 100;
+
+  // Determinar cor do progresso baseado na prioridade
+  const getProgressColor = () => {
+    if (habit.priority === HabitPriority.HIGH) return 'progress-error';
+    if (habit.priority === HabitPriority.MEDIUM) return 'progress-warning';
+    return 'progress-info';
+  };
+
+  // Determinar se o hábito está no caminho certo
+  const isOnTrack = weekProgress >= habit.goal;
+  const needsAttention = weekProgress < habit.goal / 2;
 
   return (
-    <div className="card bg-base-100 shadow-xl mb-2" style={{ borderLeft: `4px solid ${habit.color}` }}>
-      <div className="card-body p-3">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div 
-              className="w-8 h-8 flex items-center justify-center rounded-md"
-              style={{ backgroundColor: habit.color, color: 'white' }}
-            >
-              {habit.icon}
+    <div className="card bg-base-100 shadow-md mb-4 border-l-4" style={{ borderLeftColor: habit.color }}>
+      <div className="card-body p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">{habit.icon}</span>
+            <div>
+              <h3 className="font-semibold text-lg">{habit.name}</h3>
+              <div className="flex items-center gap-2 text-sm">
+                <span className={`badge badge-sm ${
+                  habit.priority === HabitPriority.HIGH ? 'badge-error' : 
+                  habit.priority === HabitPriority.MEDIUM ? 'badge-warning' : 'badge-info'
+                }`}>
+                  {habit.priority === HabitPriority.HIGH ? 'Alta' : 
+                   habit.priority === HabitPriority.MEDIUM ? 'Média' : 'Baixa'}
+                </span>
+                <span className="text-base-content/60">Meta: {habit.goal}/7 dias</span>
+              </div>
             </div>
-            <h3 className="card-title text-lg">{habit.name}</h3>
-            {getPriorityLabel(habit.priority)}
           </div>
           
           <div className="flex items-center gap-2">
-            <button 
-              className="btn btn-circle btn-xs btn-ghost" 
+            <div className="text-right">
+              <div className="text-sm font-medium">
+                {weekProgress}/{habit.goal}
+                {isOnTrack && <span className="text-success ml-1">✓</span>}
+                {needsAttention && <span className="text-warning ml-1">⚠</span>}
+              </div>
+              <div className="text-xs text-base-content/60">
+                Sequência: {habit.streak} dias
+              </div>
+            </div>
+            
+            <button
+              className="btn btn-ghost btn-sm"
               onClick={() => setShowDetails(!showDetails)}
             >
               {showDetails ? '▼' : '▶'}
             </button>
-            <button 
-              className="btn btn-circle btn-xs btn-ghost" 
-              onClick={() => onRemove(habit.id)}
-            >
-              ✕
-            </button>
           </div>
         </div>
-        
+
+        {/* Barra de progresso */}
+        <div className="mb-3">
+          <progress 
+            className={`progress ${getProgressColor()} w-full`} 
+            value={progressPercentage} 
+            max="100"
+          ></progress>
+          <div className="text-xs text-center text-base-content/60 mt-1">
+            {Math.round(progressPercentage)}% da meta
+          </div>
+        </div>
+
+        {/* Detalhes expandidos */}
         {showDetails && (
-          <div className="mt-2 mb-2">
-            <div className="flex justify-between text-sm mb-1">
-              <span>Progresso: {habit.completed.filter(Boolean).length}/{habit.goal} dias</span>
-              <span>{progressPercentage}%</span>
-            </div>
-            <progress 
-              className={`progress w-full ${isGoalMet ? 'progress-success' : 'progress-primary'}`} 
-              value={progressPercentage > 100 ? 100 : progressPercentage} 
-              max="100"
-            ></progress>
-            
-            {habit.streak > 0 && (
-              <div className="flex items-center gap-1 mt-2 text-sm">
-                <span className="text-warning">🔥 Sequência atual: {habit.streak} dias</span>
-              </div>
-            )}
-            
-            {habit.bestStreak > 0 && habit.bestStreak !== habit.streak && (
-              <div className="flex items-center gap-1 mt-1 text-sm">
-                <span className="text-info">⭐ Melhor sequência: {habit.bestStreak} dias</span>
-              </div>
-            )}
-            
-            <div className="mt-2">
+          <div className="border-t pt-3">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium">Detalhes</span>
               <button 
-                className="btn btn-xs btn-outline"
+                className="btn btn-ghost btn-xs"
                 onClick={() => setShowNotes(!showNotes)}
               >
-                {showNotes ? 'Ocultar notas' : (habit.notes ? 'Editar notas' : 'Adicionar notas')}
+                {showNotes ? 'Ocultar notas' : 'Adicionar notas'}
               </button>
             </div>
             
+            <div className="grid grid-cols-2 gap-2 text-sm mb-2">
+              <div>
+                <span className="text-base-content/60">Melhor sequência:</span>
+                <span className="ml-1 font-medium">{habit.bestStreak} dias</span>
+              </div>
+              <div>
+                <span className="text-base-content/60">Categoria:</span>
+                <span className="ml-1 font-medium">{habit.category}</span>
+              </div>
+            </div>
+
             {showNotes && (
               <div className="mt-2">
                 <textarea
@@ -138,20 +154,20 @@ export const HabitItem = ({ habit, weekDays, onToggle, onRemove, onUpdate }: Hab
         )}
         
         <div className="grid grid-cols-7 gap-2 mt-3">
-          {weekDays.map((day, index) => {
-            const isToday = new Date(day).toDateString() === new Date().toDateString();
+          {weekDays.map((date, index) => {
+            const isToday = new Date(date).toDateString() === new Date().toDateString();
+            const isCompleted = habit.completedDates[date] || false;
             
             return (
               <div key={index} className="flex flex-col items-center justify-center">
                 <span className={`text-xs mb-2 text-center ${isToday ? 'font-bold text-primary' : ''}`}>
-                  {getDayLabel(day)}
-                  {isToday && ' (hoje)'}
+                  {getDayLabel(date)}
                 </span>
                 <label className="cursor-pointer flex justify-center">
                   <input
                     type="checkbox"
-                    checked={habit.completed[index]}
-                    onChange={() => onToggle(habit.id, index)}
+                    checked={isCompleted}
+                    onChange={() => onToggle(habit.id, date)}
                     className={`checkbox checkbox-lg ${
                       habit.priority === HabitPriority.HIGH ? 'checkbox-error' : 
                       habit.priority === HabitPriority.MEDIUM ? 'checkbox-warning' : 'checkbox-info'
