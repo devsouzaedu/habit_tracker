@@ -224,6 +224,32 @@ const migrateOldData = (habits: any[]): Habit[] => {
   });
 };
 
+// Função para mesclar hábitos carregados com os hábitos padrão
+const mergeWithDefaultHabits = (loadedHabits: any[]): Habit[] => {
+  const mergedHabits: Habit[] = [];
+  
+  // Para cada hábito padrão, verificar se existe nos dados carregados
+  defaultHabits.forEach(defaultHabit => {
+    const loadedHabit = loadedHabits.find(h => h.name === defaultHabit.name || h.id === defaultHabit.id);
+    
+    if (loadedHabit) {
+      // Se encontrou, mesclar os dados mantendo as datas completadas
+      mergedHabits.push({
+        ...defaultHabit,
+        completedDates: loadedHabit.completedDates || loadedHabit.completed || {},
+        streak: loadedHabit.streak || 0,
+        bestStreak: loadedHabit.bestStreak || 0,
+        notes: loadedHabit.notes || defaultHabit.notes
+      });
+    } else {
+      // Se não encontrou, usar o hábito padrão
+      mergedHabits.push(defaultHabit);
+    }
+  });
+  
+  return mergedHabits;
+};
+
 export const useHabitTracker = () => {
   const [state, setState] = useState<HabitTrackerState>({
     habits: defaultHabits,
@@ -268,16 +294,25 @@ export const useHabitTracker = () => {
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = row not found
         console.error('❌ Erro ao carregar dados:', error);
+        console.log('📝 Usando dados padrão devido ao erro');
+        setState(prevState => ({
+          ...prevState,
+          habits: defaultHabits,
+          currentWeek: getCurrentWeek()
+        }));
         setIsLoading(false);
         return;
       }
 
-      if (data && data.habit_data) {
+      if (data && data.habit_data && data.habit_data.habits && data.habit_data.habits.length > 0) {
         console.log('✅ Dados dos hábitos carregados:', data.habit_data);
         
         // Verificar se precisa migrar dados antigos
-        const loadedHabits = data.habit_data.habits || defaultHabits;
-        const migratedHabits = migrateOldData(loadedHabits);
+        const loadedHabits = data.habit_data.habits;
+        
+        // Se os hábitos carregados são diferentes dos padrão, mesclar com os padrão
+        const mergedHabits = mergeWithDefaultHabits(loadedHabits);
+        const migratedHabits = migrateOldData(mergedHabits);
         
         setState({
           ...data.habit_data,
@@ -285,12 +320,23 @@ export const useHabitTracker = () => {
           currentWeek: getCurrentWeek() // Sempre atualizar a semana atual
         });
       } else {
-        console.log('📝 Nenhum dado encontrado, usando dados padrão');
+        console.log('📝 Nenhum dado encontrado ou dados vazios, usando dados padrão');
+        setState(prevState => ({
+          ...prevState,
+          habits: defaultHabits,
+          currentWeek: getCurrentWeek()
+        }));
       }
       
       setIsLoading(false);
     } catch (error) {
       console.error('❌ Erro ao conectar com Supabase:', error);
+      console.log('📝 Usando dados padrão devido ao erro de conexão');
+      setState(prevState => ({
+        ...prevState,
+        habits: defaultHabits,
+        currentWeek: getCurrentWeek()
+      }));
       setIsLoading(false);
     }
   };
@@ -448,6 +494,45 @@ export const useHabitTracker = () => {
     return habit ? Object.keys(habit.completedDates).filter(date => habit.completedDates[date]) : [];
   };
 
+  // Função para resetar dados e usar hábitos padrão
+  const resetToDefaultHabits = async () => {
+    console.log('🔄 Resetando para hábitos padrão...');
+    
+    const newState = {
+      habits: defaultHabits,
+      currentDate: new Date().toISOString().split('T')[0],
+      currentWeek: getCurrentWeek(),
+      statistics: {
+        totalCompletionRate: 0,
+        weeklyCompletionRate: 0,
+        bestHabit: '',
+        worstHabit: '',
+        longestStreak: 0,
+      }
+    };
+    
+    setState(newState);
+    
+    // Salvar os dados padrão no Supabase
+    try {
+      const { error } = await supabase
+        .from('habits_data')
+        .upsert({
+          user_id: userId,
+          habit_data: newState,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) {
+        console.error('❌ Erro ao resetar dados no Supabase:', error);
+      } else {
+        console.log('✅ Dados resetados com sucesso no Supabase');
+      }
+    } catch (error) {
+      console.error('❌ Erro ao conectar com Supabase durante reset:', error);
+    }
+  };
+
   const updateHabit = (habitId: string, updates: Partial<Habit>) => {
     setState(prevState => ({
       ...prevState,
@@ -497,6 +582,7 @@ export const useHabitTracker = () => {
     refreshData: loadFromSupabase,
     isHabitCompletedOnDate,
     getHabitCompletedDates,
+    resetToDefaultHabits,
     // Removidas as funções addHabit e removeHabit conforme solicitado
   };
 }; 

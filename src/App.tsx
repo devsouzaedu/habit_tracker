@@ -46,7 +46,8 @@ function App() {
     updateHabit,
     exportData,
     importData,
-    refreshData
+    refreshData,
+    resetToDefaultHabits
   } = useHabitTracker();
 
   const [activeTab, setActiveTab] = useState<'habits' | 'stats' | 'instagram' | 'settings'>('habits');
@@ -248,6 +249,28 @@ function App() {
                     onImport={importData}
                     onRefresh={refreshData}
                   />
+                </div>
+              </div>
+
+              <div className="card bg-base-100 shadow-xl">
+                <div className="card-body">
+                  <h3 className="card-title text-warning">⚠️ Zona de Perigo</h3>
+                  <p className="text-sm text-base-content/70 mb-4">
+                    Use estas opções apenas se houver problemas com os dados dos hábitos.
+                  </p>
+                  <button 
+                    className="btn btn-warning"
+                    onClick={() => {
+                      if (confirm('Tem certeza? Isso irá resetar todos os hábitos para o estado padrão, mas manterá o histórico de completação.')) {
+                        resetToDefaultHabits();
+                      }
+                    }}
+                  >
+                    🔄 Resetar Hábitos para Padrão
+                  </button>
+                  <div className="text-xs text-base-content/60 mt-2">
+                    * Esta ação força o uso dos 12 hábitos padrão e corrige problemas de sincronização
+                  </div>
                 </div>
               </div>
 
