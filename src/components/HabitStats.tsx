@@ -13,7 +13,11 @@ export const HabitStats = ({ habits }: HabitStatsProps) => {
   // Calcular estatísticas da semana atual
   const today = new Date();
   const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay());
+  
+  // Ajustar para começar na segunda-feira (padrão brasileiro)
+  const dayOfWeek = startOfWeek.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  startOfWeek.setDate(startOfWeek.getDate() - daysToMonday);
   
   const weekDates: string[] = [];
   for (let i = 0; i < 7; i++) {

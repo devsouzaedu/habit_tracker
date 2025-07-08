@@ -12,8 +12,8 @@ const getWeekFromDate = (date: Date): Date[] => {
   
   // Ajustar para começar na segunda-feira (padrão brasileiro)
   const dayOfWeek = startOfWeek.getDay();
-  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Se for domingo (0), volta 6 dias, senão vai para segunda
-  startOfWeek.setDate(startOfWeek.getDate() + diff);
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Se for domingo, volta 6 dias, senão volta (dayOfWeek - 1) dias
+  startOfWeek.setDate(startOfWeek.getDate() - daysToMonday);
   
   for (let i = 0; i < 7; i++) {
     const day = new Date(startOfWeek);
