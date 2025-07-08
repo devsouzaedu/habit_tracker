@@ -15,7 +15,7 @@ export const HabitItem = ({ habit, weekDays, onToggle }: HabitItemProps) => {
         <div className="flex items-center space-x-2">
           <span className="text-lg">{habit.icon}</span>
           <div>
-            <h3 className="font-semibold text-sm neon-text">{habit.name}</h3>
+            <h3 className="font-semibold text-sm green-text">{habit.name}</h3>
             <p className="text-xs text-base-content/60">
               Meta: {habit.goal} dias/semana
             </p>
@@ -45,10 +45,10 @@ export const HabitItem = ({ habit, weekDays, onToggle }: HabitItemProps) => {
                 className={`
                   w-6 h-6 rounded border-2 transition-all duration-200
                   ${isCompleted 
-                    ? 'checkbox-cyberpunk checked bg-accent border-accent neon-glow' 
+                    ? 'checkbox-cyberpunk checked bg-accent border-accent' 
                     : 'checkbox-cyberpunk border-accent/50 hover:border-accent'
                   }
-                  ${isToday ? 'ring-2 ring-accent/50 pulse-neon' : ''}
+                  ${isToday ? 'ring-2 ring-accent/50' : ''}
                 `}
               >
                 {isCompleted && (

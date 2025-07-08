@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tema Cyberpunk Verde Neon */
+/* Tema Cyberpunk Verde Sólido */
 :root {
   --color-bg-primary: #0a0a0a;
   --color-bg-secondary: #111111;
@@ -26,7 +26,7 @@ body {
 
 /* Tema personalizado para DaisyUI */
 [data-theme="cyberpunk"] {
-  --p: 142 100% 50%; /* verde neon principal */
+  --p: 142 100% 50%; /* verde principal */
   --pc: 0 0% 0%; /* texto no primary */
   --s: 142 80% 40%; /* verde secundário */
   --sc: 0 0% 100%; /* texto no secondary */
@@ -48,52 +48,27 @@ body {
   --erc: 0 0% 100%; /* texto error */
 }
 
-/* Efeitos neon */
-.neon-glow {
-  box-shadow: 
-    0 0 5px var(--color-accent),
-    0 0 10px var(--color-accent),
-    0 0 15px var(--color-accent),
-    0 0 20px var(--color-accent);
-}
-
-.neon-text {
+/* Texto verde simples */
+.green-text {
   color: var(--color-accent);
-  text-shadow: 
-    0 0 5px var(--color-accent),
-    0 0 10px var(--color-accent),
-    0 0 15px var(--color-accent);
 }
 
-.neon-border {
-  border: 1px solid var(--color-accent);
-  box-shadow: 
-    0 0 5px var(--color-accent),
-    inset 0 0 5px var(--color-accent);
-}
-
-/* Cards com efeito cyberpunk */
+/* Cards com estilo cyberpunk sem brilho */
 .cyberpunk-card {
   background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
   border: 1px solid #333;
   border-left: 3px solid var(--color-accent);
-  box-shadow: 
-    0 4px 15px rgba(0, 0, 0, 0.3),
-    0 0 10px rgba(0, 255, 136, 0.1);
   transition: all 0.3s ease;
 }
 
 .cyberpunk-card:hover {
   border-left-color: var(--color-accent);
-  box-shadow: 
-    0 6px 20px rgba(0, 0, 0, 0.4),
-    0 0 20px rgba(0, 255, 136, 0.2);
   transform: translateY(-2px);
 }
 
-/* Botões cyberpunk */
+/* Botões cyberpunk sem brilho */
 .btn-cyberpunk {
-  background: linear-gradient(45deg, transparent, rgba(0, 255, 136, 0.1));
+  background: transparent;
   border: 1px solid var(--color-accent);
   color: var(--color-accent);
   text-transform: uppercase;
@@ -105,12 +80,9 @@ body {
 .btn-cyberpunk:hover {
   background: var(--color-accent);
   color: #000;
-  box-shadow: 
-    0 0 15px var(--color-accent),
-    inset 0 0 15px rgba(0, 255, 136, 0.2);
 }
 
-/* Progress bars com efeito neon */
+/* Progress bars simples */
 .progress-cyberpunk {
   background: #333;
   border: 1px solid #555;
@@ -118,15 +90,13 @@ body {
 
 .progress-cyberpunk::-webkit-progress-value {
   background: linear-gradient(90deg, var(--color-accent-dark), var(--color-accent));
-  box-shadow: 0 0 10px var(--color-accent);
 }
 
 .progress-cyberpunk::-moz-progress-bar {
   background: linear-gradient(90deg, var(--color-accent-dark), var(--color-accent));
-  box-shadow: 0 0 10px var(--color-accent);
 }
 
-/* Checkboxes cyberpunk */
+/* Checkboxes simples */
 .checkbox-cyberpunk {
   border: 2px solid var(--color-accent);
   background: transparent;
@@ -134,10 +104,9 @@ body {
 
 .checkbox-cyberpunk:checked {
   background: var(--color-accent);
-  box-shadow: 0 0 10px var(--color-accent);
 }
 
-/* Tabs cyberpunk */
+/* Tabs simples */
 .tabs-cyberpunk .tab {
   border: 1px solid #333;
   background: transparent;
@@ -148,13 +117,12 @@ body {
 }
 
 .tabs-cyberpunk .tab-active {
-  background: linear-gradient(45deg, transparent, rgba(0, 255, 136, 0.1));
+  background: rgba(0, 255, 136, 0.1);
   border-color: var(--color-accent);
   color: var(--color-accent);
-  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
 }
 
-/* Scrollbar cyberpunk */
+/* Scrollbar simples */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -166,41 +134,13 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--color-accent);
   border-radius: 4px;
-  box-shadow: 0 0 5px var(--color-accent);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-accent-dark);
 }
 
-/* Animações */
-@keyframes pulse-neon {
-  0%, 100% {
-    box-shadow: 0 0 5px var(--color-accent);
-  }
-  50% {
-    box-shadow: 0 0 20px var(--color-accent);
-  }
-}
-
-.pulse-neon {
-  animation: pulse-neon 2s infinite;
-}
-
-@keyframes glow-text {
-  0%, 100% {
-    text-shadow: 0 0 5px var(--color-accent);
-  }
-  50% {
-    text-shadow: 0 0 15px var(--color-accent);
-  }
-}
-
-.glow-text {
-  animation: glow-text 2s infinite;
-}
-
-/* Badge cyberpunk */
+/* Badge simples */
 .badge-cyberpunk {
   background: rgba(0, 255, 136, 0.1);
   border: 1px solid var(--color-accent);
@@ -210,7 +150,7 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* Input cyberpunk */
+/* Input simples */
 .input-cyberpunk, .textarea-cyberpunk {
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid #333;
@@ -219,20 +159,23 @@ body {
 
 .input-cyberpunk:focus, .textarea-cyberpunk:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
   outline: none;
 }
 
-/* Stats cards */
+/* Stats cards simples */
 .stat-cyberpunk {
   background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
   border: 1px solid #333;
   border-top: 3px solid var(--color-accent);
 }
 
-/* Loading spinner cyberpunk */
+/* Loading spinner simples */
 .loading-cyberpunk {
   border: 2px solid #333;
   border-top: 2px solid var(--color-accent);
-  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+/* Status indicator simples */
+.status-online {
+  background: var(--color-accent);
 }

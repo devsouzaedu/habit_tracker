@@ -66,7 +66,7 @@ function App() {
     return (
       <div className="min-h-screen bg-base-100 flex items-center justify-center">
         <div className="loading loading-spinner loading-lg loading-cyberpunk"></div>
-        <span className="ml-4 text-lg neon-text">Carregando hábitos...</span>
+        <span className="ml-4 text-lg green-text">Carregando hábitos...</span>
       </div>
     );
   }
@@ -80,17 +80,17 @@ function App() {
         <div className="cyberpunk-card rounded-lg p-4 mb-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold neon-text glow-text">Progresso de Hoje</h2>
+              <h2 className="text-xl font-bold green-text">Progresso de Hoje</h2>
               <p className="text-sm text-base-content/70">
                 {todayCompletedHabits}/{habits.length} hábitos completados
               </p>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold neon-text">{todayProgress}%</div>
+              <div className="text-3xl font-bold green-text">{todayProgress}%</div>
               {remainingHabits > 0 ? (
                 <p className="text-sm text-warning">Restam {remainingHabits}</p>
               ) : (
-                <p className="text-sm neon-text pulse-neon">Tudo completo! 🎉</p>
+                <p className="text-sm green-text">Tudo completo! 🎉</p>
               )}
             </div>
           </div>
@@ -114,7 +114,7 @@ function App() {
             </button>
             
             <div className="text-center">
-              <h2 className="text-lg font-semibold neon-text">
+              <h2 className="text-lg font-semibold green-text">
                 {isCurrentWeek ? 'Semana Atual' : 'Semana Histórica'}
               </h2>
               <p className="text-xs text-base-content/70">
@@ -134,7 +134,7 @@ function App() {
             <div className="text-center mt-2">
               <button 
                 onClick={goToCurrentWeek} 
-                className="btn btn-xs btn-cyberpunk pulse-neon"
+                className="btn btn-xs btn-cyberpunk"
               >
                 Ir para Semana Atual
               </button>
@@ -144,7 +144,7 @@ function App() {
 
         {/* Lista de Hábitos */}
         <div className="cyberpunk-card rounded-lg p-3 mb-4">
-          <h2 className="text-lg font-semibold mb-3 neon-text">Hábitos</h2>
+          <h2 className="text-lg font-semibold mb-3 green-text">Hábitos</h2>
           <div className="space-y-2">
             {habits.map((habit) => (
               <HabitItem
