@@ -2,22 +2,15 @@ import { useState, useEffect } from 'react';
 import { useHabitTracker } from './hooks/useHabitTracker';
 import { HabitItem } from './components/HabitItem';
 import { HabitStats } from './components/HabitStats';
-import { ThemeToggle } from './components/ThemeToggle';
 import { DataControls } from './components/DataControls';
-import { InstagramTracker } from './components/InstagramTracker';
-
-import { LoginScreen } from './components/LoginScreen';
 import { DashboardHeader } from './components/DashboardHeader';
-import { InspirationalQuote } from './components/InspirationalQuote';
-
-import './App.css';
 
 // Função para gerar semana baseada em uma data específica
-const getWeekFromDate = (date: Date): string[] => {
+const getWeekFromDate = (date: Date): Date[] => {
   const weekDays = [];
   const startOfWeek = new Date(date);
   
-  // Ajustar para começar na segunda-feira (ou manter como está se preferir domingo)
+  // Ajustar para começar no domingo
   const dayOfWeek = startOfWeek.getDay();
   const diff = startOfWeek.getDate() - dayOfWeek;
   startOfWeek.setDate(diff);
@@ -25,270 +18,154 @@ const getWeekFromDate = (date: Date): string[] => {
   for (let i = 0; i < 7; i++) {
     const day = new Date(startOfWeek);
     day.setDate(startOfWeek.getDate() + i);
-    weekDays.push(day.toISOString().split('T')[0]);
+    weekDays.push(day);
   }
   
   return weekDays;
 };
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    // Verificar se já está logado neste dispositivo
-    return localStorage.getItem('dashboard-authenticated') === 'true';
-  });
-  
-  const { 
-    habits, 
-    currentWeek, 
-    statistics,
-    isLoading,
-    toggleHabitCompletion, 
-    updateHabit,
-    exportData,
-    importData,
-    refreshData,
-    resetToDefaultHabits
-  } = useHabitTracker();
+  const { habits, toggleHabitCompletion, isLoading, refreshData } = useHabitTracker();
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const [activeTab, setActiveTab] = useState<'habits' | 'stats' | 'instagram' | 'settings'>('habits');
-  const [viewDate, setViewDate] = useState(new Date()); // Data para visualização
-  const [viewWeek, setViewWeek] = useState<string[]>([]); // Semana sendo visualizada
-
-  // Atualizar semana de visualização quando viewDate muda
+  // Forçar tema cyberpunk
   useEffect(() => {
-    setViewWeek(getWeekFromDate(viewDate));
-  }, [viewDate]);
+    document.documentElement.setAttribute('data-theme', 'cyberpunk');
+  }, []);
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    localStorage.setItem('dashboard-authenticated', 'true');
+  const weekDates = getWeekFromDate(selectedDate);
+  const today = new Date().toDateString();
+  const isCurrentWeek = weekDates.some(date => date.toDateString() === today);
+
+  // Estatísticas do dia atual
+  const todayString = new Date().toISOString().split('T')[0];
+  const todayCompletedHabits = habits.filter(habit => habit.completedDates[todayString]).length;
+  const todayProgress = Math.round((todayCompletedHabits / habits.length) * 100);
+  const remainingHabits = habits.length - todayCompletedHabits;
+
+  const goToPreviousWeek = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() - 7);
+    setSelectedDate(newDate);
   };
 
-  // Função para navegar entre semanas
-  const navigateWeek = (direction: 'prev' | 'next') => {
-    const newDate = new Date(viewDate);
-    newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-    setViewDate(newDate);
-    setViewWeek(getWeekFromDate(newDate));
+  const goToNextWeek = () => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + 7);
+    setSelectedDate(newDate);
   };
 
-  // Função para voltar para a semana atual
   const goToCurrentWeek = () => {
-    const today = new Date();
-    setViewDate(today);
-    setViewWeek(getWeekFromDate(today));
+    setSelectedDate(new Date());
   };
 
-  // Verificar se estamos visualizando a semana atual
-  const isCurrentWeek = () => {
-    const today = new Date().toISOString().split('T')[0];
-    return viewWeek.includes(today);
-  };
-
-  // Mostrar tela de login se não estiver logado
-  if (!isLoggedIn) {
-    return <LoginScreen onLogin={handleLogin} />;
-  }
+  // Converter weekDates para strings para compatibilidade
+  const weekDaysAsStrings = weekDates.map(date => date.toISOString().split('T')[0]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="loading loading-spinner loading-lg"></div>
-        <span className="ml-4">Carregando seus dados...</span>
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <div className="loading loading-spinner loading-lg loading-cyberpunk"></div>
+        <span className="ml-4 text-lg neon-text">Carregando hábitos...</span>
       </div>
     );
   }
 
-  // Usar a semana atual ou a semana de visualização dependendo da aba
-  const displayWeek = activeTab === 'habits' ? (viewWeek.length > 0 ? viewWeek : currentWeek) : currentWeek;
-
   return (
-    <div className="min-h-screen bg-base-200">
-      <DashboardHeader />
-      
-      <div className="container mx-auto p-4 max-w-4xl">
-        <InspirationalQuote />
+    <div className="min-h-screen bg-base-100">
+      <div className="container mx-auto px-2 py-2 max-w-6xl">
+        <DashboardHeader />
         
-        {/* Navegação por abas */}
-        <div className="tabs tabs-boxed mb-6 justify-center">
-          <button 
-            className={`tab ${activeTab === 'habits' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('habits')}
-          >
-            📋 Hábitos
-          </button>
-          <button 
-            className={`tab ${activeTab === 'stats' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('stats')}
-          >
-            📊 Estatísticas
-          </button>
-          <button 
-            className={`tab ${activeTab === 'instagram' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('instagram')}
-          >
-            📸 Instagram
-          </button>
-          <button 
-            className={`tab ${activeTab === 'settings' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('settings')}
-          >
-            ⚙️ Configurações
-          </button>
-        </div>
-
-        {/* Conteúdo das abas */}
-        {activeTab === 'habits' && (
-          <div>
-            {/* Navegação de semanas */}
-            <div className="card bg-base-100 shadow-md mb-6">
-              <div className="card-body p-4">
-                <div className="flex items-center justify-between">
-                  <button 
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => navigateWeek('prev')}
-                  >
-                    ← Semana Anterior
-                  </button>
-                  
-                  <div className="text-center">
-                    <h3 className="font-semibold">
-                      {viewWeek.length > 0 && (
-                        <>
-                          {new Date(viewWeek[0]).toLocaleDateString('pt-BR', { 
-                            day: '2-digit', 
-                            month: 'short' 
-                          })} - {new Date(viewWeek[6]).toLocaleDateString('pt-BR', { 
-                            day: '2-digit', 
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </>
-                      )}
-                    </h3>
-                    {!isCurrentWeek() && (
-                      <button 
-                        className="btn btn-xs btn-primary mt-1"
-                        onClick={goToCurrentWeek}
-                      >
-                        Ir para Semana Atual
-                      </button>
-                    )}
-                    {isCurrentWeek() && (
-                      <span className="badge badge-primary badge-sm mt-1">Semana Atual</span>
-                    )}
-                  </div>
-                  
-                  <button 
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => navigateWeek('next')}
-                  >
-                    Próxima Semana →
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold mb-4">Seus Hábitos Diários</h2>
-              <p className="text-base-content/70 mb-4">
-                {isCurrentWeek() 
-                  ? "Marque os hábitos conforme você os completa. Os dados são salvos automaticamente."
-                  : "Visualizando histórico de hábitos. Use a navegação acima para ver outras semanas."
-                }
+        {/* Estatísticas do Dia Atual */}
+        <div className="cyberpunk-card rounded-lg p-4 mb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold neon-text glow-text">Progresso de Hoje</h2>
+              <p className="text-sm text-base-content/70">
+                {todayCompletedHabits}/{habits.length} hábitos completados
               </p>
             </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold neon-text">{todayProgress}%</div>
+              {remainingHabits > 0 ? (
+                <p className="text-sm text-warning">Restam {remainingHabits}</p>
+              ) : (
+                <p className="text-sm neon-text pulse-neon">Tudo completo! 🎉</p>
+              )}
+            </div>
+          </div>
+          <div className="mt-3">
+            <progress 
+              className="progress progress-cyberpunk w-full h-3" 
+              value={todayProgress} 
+              max="100"
+            ></progress>
+          </div>
+        </div>
 
+        {/* Navegação de Semanas */}
+        <div className="cyberpunk-card rounded-lg p-3 mb-4">
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={goToPreviousWeek} 
+              className="btn btn-sm btn-cyberpunk"
+            >
+              ← Anterior
+            </button>
+            
+            <div className="text-center">
+              <h2 className="text-lg font-semibold neon-text">
+                {isCurrentWeek ? 'Semana Atual' : 'Semana Histórica'}
+              </h2>
+              <p className="text-xs text-base-content/70">
+                {weekDates[0].toLocaleDateString('pt-BR')} - {weekDates[6].toLocaleDateString('pt-BR')}
+              </p>
+            </div>
+            
+            <button 
+              onClick={goToNextWeek} 
+              className="btn btn-sm btn-cyberpunk"
+            >
+              Próxima →
+            </button>
+          </div>
+          
+          {!isCurrentWeek && (
+            <div className="text-center mt-2">
+              <button 
+                onClick={goToCurrentWeek} 
+                className="btn btn-xs btn-cyberpunk pulse-neon"
+              >
+                Ir para Semana Atual
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Lista de Hábitos */}
+        <div className="cyberpunk-card rounded-lg p-3 mb-4">
+          <h2 className="text-lg font-semibold mb-3 neon-text">Hábitos</h2>
+          <div className="space-y-2">
             {habits.map((habit) => (
               <HabitItem
                 key={habit.id}
                 habit={habit}
-                weekDays={displayWeek}
+                weekDays={weekDaysAsStrings}
                 onToggle={toggleHabitCompletion}
-                onUpdate={updateHabit}
               />
             ))}
-
-            <div className="mt-8 text-center">
-              <p className="text-sm text-base-content/60">
-                💡 Dica: Use a navegação de semanas para ver seu histórico completo de hábitos!
-              </p>
-            </div>
           </div>
-        )}
+        </div>
 
-        {activeTab === 'stats' && (
-          <HabitStats 
-            habits={habits} 
-            statistics={statistics}
-            currentWeek={currentWeek}
-          />
-        )}
+        {/* Estatísticas */}
+        <div className="cyberpunk-card rounded-lg p-3 mb-4">
+          <HabitStats habits={habits} />
+        </div>
 
-        {activeTab === 'instagram' && (
-          <InstagramTracker />
-        )}
-
-        {activeTab === 'settings' && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6">Configurações</h2>
-            
-            <div className="grid gap-6">
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h3 className="card-title">Aparência</h3>
-                  <ThemeToggle />
-                </div>
-              </div>
-
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h3 className="card-title">Backup e Restauração</h3>
-                  <DataControls 
-                    onExport={exportData}
-                    onImport={importData}
-                    onRefresh={refreshData}
-                  />
-                </div>
-              </div>
-
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h3 className="card-title text-warning">⚠️ Zona de Perigo</h3>
-                  <p className="text-sm text-base-content/70 mb-4">
-                    Use estas opções apenas se houver problemas com os dados dos hábitos.
-                  </p>
-                  <button 
-                    className="btn btn-warning"
-                    onClick={() => {
-                      if (confirm('Tem certeza? Isso irá resetar todos os hábitos para o estado padrão, mas manterá o histórico de completação.')) {
-                        resetToDefaultHabits();
-                      }
-                    }}
-                  >
-                    🔄 Resetar Hábitos para Padrão
-                  </button>
-                  <div className="text-xs text-base-content/60 mt-2">
-                    * Esta ação força o uso dos 12 hábitos padrão e corrige problemas de sincronização
-                  </div>
-                </div>
-              </div>
-
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h3 className="card-title">Informações</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Versão:</strong> 2.0.0</p>
-                    <p><strong>Hábitos fixos:</strong> Sistema não permite adicionar/remover hábitos</p>
-                    <p><strong>Persistência:</strong> Dados salvos automaticamente no Supabase</p>
-                    <p><strong>Histórico:</strong> Mantém registro completo de todos os dias</p>
-                    <p><strong>Navegação:</strong> Use as setas para navegar entre semanas</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Controles de Dados */}
+        <div className="cyberpunk-card rounded-lg p-3">
+          <DataControls onRefresh={refreshData} />
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,238 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Tema Cyberpunk Verde Neon */
+:root {
+  --color-bg-primary: #0a0a0a;
+  --color-bg-secondary: #111111;
+  --color-bg-card: #1a1a1a;
+  --color-accent: #00ff88;
+  --color-accent-dark: #00cc6a;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #cccccc;
+  --color-text-muted: #888888;
+  --color-border: #333333;
+  --color-success: #00ff88;
+  --color-warning: #ffaa00;
+  --color-error: #ff4444;
+}
+
+body {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Tema personalizado para DaisyUI */
+[data-theme="cyberpunk"] {
+  --p: 142 100% 50%; /* verde neon principal */
+  --pc: 0 0% 0%; /* texto no primary */
+  --s: 142 80% 40%; /* verde secundário */
+  --sc: 0 0% 100%; /* texto no secondary */
+  --a: 35 100% 50%; /* laranja accent */
+  --ac: 0 0% 0%; /* texto no accent */
+  --n: 0 0% 10%; /* neutro escuro */
+  --nc: 0 0% 90%; /* texto no neutro */
+  --b1: 0 0% 6%; /* background base */
+  --b2: 0 0% 10%; /* background secundário */
+  --b3: 0 0% 15%; /* background terciário */
+  --bc: 0 0% 90%; /* texto base */
+  --in: 200 100% 50%; /* info azul */
+  --inc: 0 0% 0%; /* texto info */
+  --su: 142 100% 50%; /* success verde */
+  --suc: 0 0% 0%; /* texto success */
+  --wa: 35 100% 50%; /* warning laranja */
+  --wac: 0 0% 0%; /* texto warning */
+  --er: 0 100% 60%; /* error vermelho */
+  --erc: 0 0% 100%; /* texto error */
+}
+
+/* Efeitos neon */
+.neon-glow {
+  box-shadow: 
+    0 0 5px var(--color-accent),
+    0 0 10px var(--color-accent),
+    0 0 15px var(--color-accent),
+    0 0 20px var(--color-accent);
+}
+
+.neon-text {
+  color: var(--color-accent);
+  text-shadow: 
+    0 0 5px var(--color-accent),
+    0 0 10px var(--color-accent),
+    0 0 15px var(--color-accent);
+}
+
+.neon-border {
+  border: 1px solid var(--color-accent);
+  box-shadow: 
+    0 0 5px var(--color-accent),
+    inset 0 0 5px var(--color-accent);
+}
+
+/* Cards com efeito cyberpunk */
+.cyberpunk-card {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+  border: 1px solid #333;
+  border-left: 3px solid var(--color-accent);
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    0 0 10px rgba(0, 255, 136, 0.1);
+  transition: all 0.3s ease;
+}
+
+.cyberpunk-card:hover {
+  border-left-color: var(--color-accent);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(0, 255, 136, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Botões cyberpunk */
+.btn-cyberpunk {
+  background: linear-gradient(45deg, transparent, rgba(0, 255, 136, 0.1));
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.btn-cyberpunk:hover {
+  background: var(--color-accent);
+  color: #000;
+  box-shadow: 
+    0 0 15px var(--color-accent),
+    inset 0 0 15px rgba(0, 255, 136, 0.2);
+}
+
+/* Progress bars com efeito neon */
+.progress-cyberpunk {
+  background: #333;
+  border: 1px solid #555;
+}
+
+.progress-cyberpunk::-webkit-progress-value {
+  background: linear-gradient(90deg, var(--color-accent-dark), var(--color-accent));
+  box-shadow: 0 0 10px var(--color-accent);
+}
+
+.progress-cyberpunk::-moz-progress-bar {
+  background: linear-gradient(90deg, var(--color-accent-dark), var(--color-accent));
+  box-shadow: 0 0 10px var(--color-accent);
+}
+
+/* Checkboxes cyberpunk */
+.checkbox-cyberpunk {
+  border: 2px solid var(--color-accent);
+  background: transparent;
+}
+
+.checkbox-cyberpunk:checked {
+  background: var(--color-accent);
+  box-shadow: 0 0 10px var(--color-accent);
+}
+
+/* Tabs cyberpunk */
+.tabs-cyberpunk .tab {
+  border: 1px solid #333;
+  background: transparent;
+  color: #888;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.tabs-cyberpunk .tab-active {
+  background: linear-gradient(45deg, transparent, rgba(0, 255, 136, 0.1));
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+/* Scrollbar cyberpunk */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 4px;
+  box-shadow: 0 0 5px var(--color-accent);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-dark);
+}
+
+/* Animações */
+@keyframes pulse-neon {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--color-accent);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--color-accent);
+  }
+}
+
+.pulse-neon {
+  animation: pulse-neon 2s infinite;
+}
+
+@keyframes glow-text {
+  0%, 100% {
+    text-shadow: 0 0 5px var(--color-accent);
+  }
+  50% {
+    text-shadow: 0 0 15px var(--color-accent);
+  }
+}
+
+.glow-text {
+  animation: glow-text 2s infinite;
+}
+
+/* Badge cyberpunk */
+.badge-cyberpunk {
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Input cyberpunk */
+.input-cyberpunk, .textarea-cyberpunk {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
+  color: var(--color-text-primary);
+}
+
+.input-cyberpunk:focus, .textarea-cyberpunk:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+  outline: none;
+}
+
+/* Stats cards */
+.stat-cyberpunk {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+  border: 1px solid #333;
+  border-top: 3px solid var(--color-accent);
+}
+
+/* Loading spinner cyberpunk */
+.loading-cyberpunk {
+  border: 2px solid #333;
+  border-top: 2px solid var(--color-accent);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
