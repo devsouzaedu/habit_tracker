@@ -5,15 +5,15 @@ import { HabitStats } from './components/HabitStats';
 import { DataControls } from './components/DataControls';
 import { DashboardHeader } from './components/DashboardHeader';
 
-// Função para gerar semana baseada em uma data específica
+// Função para gerar semana baseada em uma data específica (segunda a domingo)
 const getWeekFromDate = (date: Date): Date[] => {
   const weekDays = [];
   const startOfWeek = new Date(date);
   
-  // Ajustar para começar no domingo
+  // Ajustar para começar na segunda-feira (padrão brasileiro)
   const dayOfWeek = startOfWeek.getDay();
-  const diff = startOfWeek.getDate() - dayOfWeek;
-  startOfWeek.setDate(diff);
+  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Se for domingo (0), volta 6 dias, senão vai para segunda
+  startOfWeek.setDate(startOfWeek.getDate() + diff);
   
   for (let i = 0; i < 7; i++) {
     const day = new Date(startOfWeek);

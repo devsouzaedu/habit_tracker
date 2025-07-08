@@ -7,7 +7,7 @@ interface HabitItemProps {
 }
 
 export const HabitItem = ({ habit, weekDays, onToggle }: HabitItemProps) => {
-  const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const dayNames = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
   return (
     <div className="cyberpunk-card rounded-lg p-3">
