@@ -43,16 +43,16 @@ export const HabitItem = ({ habit, weekDays, onToggle }: HabitItemProps) => {
               <button
                 onClick={() => onToggle(habit.id, date)}
                 className={`
-                  w-6 h-6 rounded border-2 transition-all duration-200
+                  w-6 h-6 rounded border-2 transition-all duration-200 flex items-center justify-center
                   ${isCompleted 
-                    ? 'checkbox-cyberpunk checked bg-accent border-accent' 
-                    : 'checkbox-cyberpunk border-accent/50 hover:border-accent'
+                    ? 'bg-accent border-accent' 
+                    : 'border-accent/50 hover:border-accent bg-transparent'
                   }
                   ${isToday ? 'ring-2 ring-accent/50' : ''}
                 `}
               >
                 {isCompleted && (
-                  <svg className="w-3 h-3 text-black mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-3 h-3 text-black" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 )}
