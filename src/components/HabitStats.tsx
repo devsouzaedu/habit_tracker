@@ -7,7 +7,7 @@ interface HabitStatsProps {
 
 export const HabitStats = ({ habits }: HabitStatsProps) => {
   // Calcular estatísticas básicas
-  const todayString = new Date().toISOString().split('T')[0];
+  const todayString = new Date(2024, 6, 11).toISOString().split('T')[0]; // 2024-07-11
   const todayCompleted = habits.filter(habit => habit.completedDates[todayString] === HabitStatus.COMPLETED).length;
   const todayFailed = habits.filter(habit => habit.completedDates[todayString] === HabitStatus.FAILED).length;
   const todayProgress = Math.round((todayCompleted / habits.length) * 100);

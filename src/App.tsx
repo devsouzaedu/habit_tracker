@@ -43,7 +43,7 @@ type TabType = 'habits' | 'instagram' | 'pdf' | 'notes';
 
 function App() {
   const { habits, toggleHabitCompletion, isLoading, refreshData } = useHabitTracker();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date(2024, 6, 11)); // Forçar para 11/07/2024
   const [activeTab, setActiveTab] = useState<TabType>('habits');
 
   // Forçar tema cyberpunk
@@ -52,12 +52,12 @@ function App() {
   }, []);
 
   const weekDates = getWeekFromDate(selectedDate);
-  const today = new Date().toDateString();
+  const today = new Date(2024, 6, 11).toDateString(); // Usar 11/07/2024 como "hoje"
   const isCurrentWeek = weekDates.some(date => date.toDateString() === today);
   const { dayName, dayNumber } = getCurrentDateInfo();
 
   // Estatísticas do dia atual
-  const todayString = new Date().toISOString().split('T')[0];
+  const todayString = new Date(2024, 6, 11).toISOString().split('T')[0]; // 2024-07-11
   const todayCompletedHabits = habits.filter(habit => habit.completedDates[todayString] === 'completed').length;
   const todayProgress = Math.round((todayCompletedHabits / habits.length) * 100);
   const remainingHabits = habits.length - todayCompletedHabits;
@@ -75,7 +75,7 @@ function App() {
   };
 
   const goToCurrentWeek = () => {
-    setSelectedDate(new Date());
+    setSelectedDate(new Date(2024, 6, 11)); // Ir para 11/07/2024
   };
 
   // Converter weekDates para strings para compatibilidade

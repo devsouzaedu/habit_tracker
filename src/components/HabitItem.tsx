@@ -66,7 +66,7 @@ export const HabitItem = ({ habit, weekDays, onToggle }: HabitItemProps) => {
         {weekDays.map((date, index) => {
           const status = habit.completedDates[date] || HabitStatus.INACTIVE;
           const dayDate = new Date(date);
-          const isToday = date === new Date().toISOString().split('T')[0];
+          const isToday = date === new Date(2024, 6, 11).toISOString().split('T')[0]; // 2024-07-11
           
           return (
             <div key={date} className="text-center">
