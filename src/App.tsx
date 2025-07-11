@@ -30,7 +30,8 @@ const getWeekFromDate = (date: Date): Date[] => {
 
 // Função para obter o nome do dia da semana e data formatada
 const getCurrentDateInfo = () => {
-  const today = new Date();
+  // Forçar data específica: 11/07/2024 (sexta-feira)
+  const today = new Date(2024, 6, 11); // Mês 6 = julho (0-indexed)
   const dayNames = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
   const dayName = dayNames[today.getDay()];
   const dayNumber = today.getDate().toString().padStart(2, '0');
@@ -57,7 +58,7 @@ function App() {
 
   // Estatísticas do dia atual
   const todayString = new Date().toISOString().split('T')[0];
-  const todayCompletedHabits = habits.filter(habit => habit.completedDates[todayString]).length;
+  const todayCompletedHabits = habits.filter(habit => habit.completedDates[todayString] === 'completed').length;
   const todayProgress = Math.round((todayCompletedHabits / habits.length) * 100);
   const remainingHabits = habits.length - todayCompletedHabits;
 

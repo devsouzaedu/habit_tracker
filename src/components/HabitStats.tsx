@@ -1,4 +1,5 @@
 import type { Habit } from '../types';
+import { HabitStatus } from '../types';
 
 interface HabitStatsProps {
   habits: Habit[];
@@ -7,7 +8,8 @@ interface HabitStatsProps {
 export const HabitStats = ({ habits }: HabitStatsProps) => {
   // Calcular estatísticas básicas
   const todayString = new Date().toISOString().split('T')[0];
-  const todayCompleted = habits.filter(habit => habit.completedDates[todayString]).length;
+  const todayCompleted = habits.filter(habit => habit.completedDates[todayString] === HabitStatus.COMPLETED).length;
+  const todayFailed = habits.filter(habit => habit.completedDates[todayString] === HabitStatus.FAILED).length;
   const todayProgress = Math.round((todayCompleted / habits.length) * 100);
 
   // Calcular estatísticas da semana atual
@@ -26,12 +28,6 @@ export const HabitStats = ({ habits }: HabitStatsProps) => {
     weekDates.push(date.toISOString().split('T')[0]);
   }
   
-  const weekCompleted = habits.reduce((total, habit) => {
-    return total + weekDates.filter(date => habit.completedDates[date]).length;
-  }, 0);
-  const weekTotal = habits.length * 7;
-  const weekProgress = Math.round((weekCompleted / weekTotal) * 100);
-
   // Encontrar maior sequência
   const longestStreak = Math.max(...habits.map(habit => habit.streak), 0);
 
@@ -47,25 +43,30 @@ export const HabitStats = ({ habits }: HabitStatsProps) => {
       <h2 className="text-lg font-semibold mb-3 green-text">Estatísticas</h2>
       
       {/* Cards principais */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <div className="stat-cyberpunk rounded-lg p-3 text-center">
           <div className="text-2xl font-bold green-text">{todayProgress}%</div>
           <div className="text-xs text-base-content/70">Hoje</div>
         </div>
         
         <div className="stat-cyberpunk rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold green-text">{weekProgress}%</div>
-          <div className="text-xs text-base-content/70">Esta Semana</div>
+          <div className="text-2xl font-bold text-green-500">{todayCompleted}</div>
+          <div className="text-xs text-base-content/70">✅ Feitos</div>
+        </div>
+        
+        <div className="stat-cyberpunk rounded-lg p-3 text-center">
+          <div className="text-2xl font-bold text-red-500">{todayFailed}</div>
+          <div className="text-xs text-base-content/70">❌ Falhas</div>
         </div>
         
         <div className="stat-cyberpunk rounded-lg p-3 text-center">
           <div className="text-2xl font-bold green-text">{longestStreak}</div>
-          <div className="text-xs text-base-content/70">Maior Sequência</div>
+          <div className="text-xs text-base-content/70">🔥 Sequência</div>
         </div>
         
         <div className="stat-cyberpunk rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold green-text">{habits.length - todayCompleted}</div>
-          <div className="text-xs text-base-content/70">Restantes</div>
+          <div className="text-2xl font-bold text-yellow-500">{habits.length - todayCompleted - todayFailed}</div>
+          <div className="text-xs text-base-content/70">⏳ Pendentes</div>
         </div>
       </div>
 
@@ -93,7 +94,8 @@ export const HabitStats = ({ habits }: HabitStatsProps) => {
         <h3 className="font-semibold text-sm mb-2 green-text">📊 Progresso Semanal</h3>
         <div className="space-y-2">
           {habits.slice(0, 6).map(habit => {
-            const habitWeekCompleted = weekDates.filter(date => habit.completedDates[date]).length;
+            const habitWeekCompleted = weekDates.filter(date => habit.completedDates[date] === HabitStatus.COMPLETED).length;
+            const habitWeekFailed = weekDates.filter(date => habit.completedDates[date] === HabitStatus.FAILED).length;
             const habitProgress = Math.round((habitWeekCompleted / habit.goal) * 100);
             
             return (
@@ -103,8 +105,10 @@ export const HabitStats = ({ habits }: HabitStatsProps) => {
                     <span>{habit.icon}</span>
                     <span>{habit.name}</span>
                   </span>
-                  <span className="text-xs green-text">
-                    {habitWeekCompleted}/{habit.goal}
+                  <span className="text-xs flex items-center space-x-2">
+                    <span className="text-green-500">✅{habitWeekCompleted}</span>
+                    <span className="text-red-500">❌{habitWeekFailed}</span>
+                    <span className="green-text">{habitWeekCompleted}/{habit.goal}</span>
                   </span>
                 </div>
                 <progress 

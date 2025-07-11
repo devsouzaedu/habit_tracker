@@ -233,11 +233,15 @@ export const NotesTab = () => {
                   </pre>
                 </div>
                 <div className="text-xs text-base-content/70">
-                  Criada em: {currentNote && new Date(currentNote.createdAt).toLocaleString('pt-BR')}
-                  {currentNote?.updatedAt !== currentNote?.createdAt && (
-                    <span className="ml-4">
-                      Atualizada em: {new Date(currentNote.updatedAt).toLocaleString('pt-BR')}
-                    </span>
+                  {currentNote && (
+                    <>
+                      Criada em: {new Date(currentNote.createdAt).toLocaleString('pt-BR')}
+                      {currentNote.updatedAt !== currentNote.createdAt && (
+                        <span className="ml-4">
+                          Atualizada em: {new Date(currentNote.updatedAt).toLocaleString('pt-BR')}
+                        </span>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

@@ -1,8 +1,14 @@
+export enum HabitStatus {
+  INACTIVE = 'inactive',    // Não marcado (padrão)
+  COMPLETED = 'completed',  // Feito (verde)
+  FAILED = 'failed'         // Falha (vermelho)
+}
+
 export type Habit = {
   id: string;
   name: string;
   description?: string;
-  completedDates: Record<string, boolean>; // Mudança: armazenar por data específica (YYYY-MM-DD)
+  completedDates: Record<string, HabitStatus>; // Mudança: armazenar status por data específica (YYYY-MM-DD)
   category: HabitCategory;
   priority: HabitPriority;
   goal: number;

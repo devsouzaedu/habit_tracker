@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Habit, HabitTrackerState } from '../types';
-import { HabitCategory, HabitPriority } from '../types';
+import { HabitCategory, HabitPriority, HabitStatus } from '../types';
 import { supabase } from '../lib/supabase';
 
 // Lista fixa de hábitos conforme especificado pelo usuário
@@ -179,7 +179,7 @@ const getCurrentWeek = (): string[] => {
 };
 
 // Função para calcular a sequência atual de um hábito baseado nas datas completadas
-const calculateStreak = (completedDates: Record<string, boolean>): number => {
+const calculateStreak = (completedDates: Record<string, HabitStatus>): number => {
   const today = new Date();
   let streak = 0;
   
@@ -189,7 +189,7 @@ const calculateStreak = (completedDates: Record<string, boolean>): number => {
     checkDate.setDate(today.getDate() - i);
     const dateStr = checkDate.toISOString().split('T')[0];
     
-    if (completedDates[dateStr]) {
+    if (completedDates[dateStr] === HabitStatus.COMPLETED) {
       streak++;
     } else {
       break;
@@ -395,7 +395,7 @@ export const useHabitTracker = () => {
     state.habits.forEach(habit => {
       currentWeek.forEach(date => {
         totalPossibleThisWeek++;
-        if (habit.completedDates[date]) {
+        if (habit.completedDates[date] === HabitStatus.COMPLETED) {
           totalChecksThisWeek++;
         }
       });
@@ -410,7 +410,7 @@ export const useHabitTracker = () => {
 
     // Calcular a taxa de conclusão semanal (quantos hábitos foram feitos pelo menos uma vez)
     const completedThisWeek = state.habits.reduce(
-      (total, habit) => total + (currentWeek.some(date => habit.completedDates[date]) ? 1 : 0),
+      (total, habit) => total + (currentWeek.some(date => habit.completedDates[date] === HabitStatus.COMPLETED) ? 1 : 0),
       0
     );
     const weeklyCompletionRate = state.habits.length > 0 ? Math.round((completedThisWeek / state.habits.length) * 100) : 0;
@@ -423,7 +423,7 @@ export const useHabitTracker = () => {
     let longestStreak = 0;
 
     state.habits.forEach(habit => {
-      const weekCompletions = currentWeek.filter(date => habit.completedDates[date]).length;
+      const weekCompletions = currentWeek.filter(date => habit.completedDates[date] === HabitStatus.COMPLETED).length;
       const completionRate = (weekCompletions / 7) * 100;
       
       if (completionRate > bestRate) {
@@ -459,11 +459,21 @@ export const useHabitTracker = () => {
       habits: prevState.habits.map(habit => {
         if (habit.id === habitId) {
           const newCompletedDates = { ...habit.completedDates };
+          const currentStatus = newCompletedDates[date] || HabitStatus.INACTIVE;
           
-          if (newCompletedDates[date]) {
-            delete newCompletedDates[date]; // Remover se já estava marcado
-          } else {
-            newCompletedDates[date] = true; // Adicionar se não estava marcado
+          // Ciclo de 3 estados: INACTIVE -> COMPLETED -> FAILED -> INACTIVE
+          switch (currentStatus) {
+            case HabitStatus.INACTIVE:
+              newCompletedDates[date] = HabitStatus.COMPLETED;
+              break;
+            case HabitStatus.COMPLETED:
+              newCompletedDates[date] = HabitStatus.FAILED;
+              break;
+            case HabitStatus.FAILED:
+              delete newCompletedDates[date]; // Volta para INACTIVE (sem entrada)
+              break;
+            default:
+              newCompletedDates[date] = HabitStatus.COMPLETED;
           }
           
           // Recalcular streak
@@ -483,15 +493,20 @@ export const useHabitTracker = () => {
   };
 
   // Função para obter status de um hábito em uma data específica
-  const isHabitCompletedOnDate = (habitId: string, date: string): boolean => {
+  const getHabitStatusOnDate = (habitId: string, date: string): HabitStatus => {
     const habit = state.habits.find(h => h.id === habitId);
-    return habit ? !!habit.completedDates[date] : false;
+    return habit ? (habit.completedDates[date] || HabitStatus.INACTIVE) : HabitStatus.INACTIVE;
+  };
+
+  // Função para verificar se um hábito foi completado em uma data específica (backward compatibility)
+  const isHabitCompletedOnDate = (habitId: string, date: string): boolean => {
+    return getHabitStatusOnDate(habitId, date) === HabitStatus.COMPLETED;
   };
 
   // Função para obter todas as datas em que um hábito foi completado
   const getHabitCompletedDates = (habitId: string): string[] => {
     const habit = state.habits.find(h => h.id === habitId);
-    return habit ? Object.keys(habit.completedDates).filter(date => habit.completedDates[date]) : [];
+    return habit ? Object.keys(habit.completedDates).filter(date => habit.completedDates[date] === HabitStatus.COMPLETED) : [];
   };
 
   // Função para resetar dados e usar hábitos padrão
@@ -581,6 +596,7 @@ export const useHabitTracker = () => {
     importData,
     refreshData: loadFromSupabase,
     isHabitCompletedOnDate,
+    getHabitStatusOnDate,
     getHabitCompletedDates,
     resetToDefaultHabits,
     // Removidas as funções addHabit e removeHabit conforme solicitado
